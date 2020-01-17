@@ -1,0 +1,47 @@
+## Project Proposals ##
+- Implement something proposed by a paper
+- Eye/Iris recognition using smartphone pictures (selfies: uncontrolled setting & different quality of images)
+- Extract/estimate the quality of measures on different frames of a video of the same person moving his/her
+face and use the best measures for recognition.
+- See how the distribution of classes changes while changing feature extraction techniques.
+    - Increase the performances of the system by using different[ial] thresholds (depending on the CLASS (see Doddington's zoo & such) a user belongs to.
+
+## Project Elements ##
+- Report:
+    - (*) Performance evaluation
+    - Design choices
+    - Dataset for testing and training
+- Presentation:
+    - PowerPoint
+    - Demo
+
+### Performance Evaluation ###
+- The choice of training & testing sets from the overall dataset can heavily affect the results.
+- In order to have more reliable results, use MULTIPLE PARTITIONS of the dataset into training & testing sets and
+eventually take the AVERAGE of the measurements.
+- N.B.: every test MUST be REPRODUCIBLE (sets, partitions, etc.) => Random choices are NOT allowed.
+
+## OpenCV ##
+- Denseflow: module for movement detection
+- LBPH = LPB histogram.
+    - Window size: Generally 3x3 (radius = 1) or 5x5 (radius = 2)
+    - Grid measure: grid partitioning the image (NOT the sliding window).
+    - Overall result: combination of all the histograms derived from the separate processing of each grid.
+
+## Microsoft Azure ##
+AI & cognitive services for biometric purposes:
+    - Face identification (detection is faster when carried out locally)
+    - Emotion recognition
+    - Voice recognition
+
+## DLIB ##
+Framework containing biometric functions (better than OpenCV [Prof.])
+
+## Dataset ##
+- It is better to have different capture sessions in a dataset rather than a high number of subjects (taken in the same session)
+- Famous datasets:
+    - Feret
+    - CDB
+    - (*) LBF (labeled faces in the wild)
+    - ScFace
+
