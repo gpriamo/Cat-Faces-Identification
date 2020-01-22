@@ -1,14 +1,53 @@
+import time
+
 import cv2.cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
+import os
 
 models_dir = '../models/'
-SF = 1.04  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar)
+# try: SF= 1.1 - N = 5
+SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
 N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
 
 
-def cat_face_detect(im):
-    img = cv.imread(im)
+def image_resize(image, width=None, height=None, inter=cv.INTER_AREA):
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv.resize(image, dim, interpolation=inter)
+
+    # return the resized image
+    return resized
+
+
+def cat_face_detect(file):
+    im_orig = cv.imread(file)
+
+    img = image_resize(im_orig, 512, 512)
+
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     cat_cascade = cv.CascadeClassifier(models_dir + 'haarcascade_frontalcatface.xml')
     cat_cascade_ext = cv.CascadeClassifier(models_dir + 'haarcascade_frontalcatface_extended.xml')
@@ -32,7 +71,7 @@ def cat_face_detect(im):
         img = cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
     cv.namedWindow('win', cv.WINDOW_NORMAL)
-    cv.resizeWindow('win', 1980, 1800)
+    # cv.resizeWindow('win', 1980, 1800)
 
     cv.imshow('win', img)
     cv.waitKey(0)
@@ -80,13 +119,10 @@ def face_detect():
 
 
 if __name__ == '__main__':
-    # face_detect()
-    im1 = '../images/Cat03.jpg'
-    im2 = '../images/t1.jpg'
-    im3 = '../images/cat2.jpg'
-    im4 = '../images/cat4.jpeg'  # bad res
+    imdir = '../images'
 
-    ls = [im1, im2, im3, im4]
+    images = [os.path.join(imdir, f) for f in os.listdir(imdir) if
+              os.path.isfile(os.path.join(imdir, f))]
 
-    for im in ls:
+    for im in images:
         cat_face_detect(im)
