@@ -57,9 +57,25 @@ def cat_face_detect(file):
     print(cat_cascade_ext.empty())
     print(cat_cascade_lbp.empty())
 
+    print("Normal Haar:")
+    t0 = cv.getTickCount()
     cats = cat_cascade.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+    t1 = cv.getTickCount()
+    compute_elapsed_time(t0, t1)
+    time.sleep(2)
+
+    print("Extended Haar:")
+    t0 = cv.getTickCount()
     cats_ext = cat_cascade_ext.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+    t1 = cv.getTickCount()
+    compute_elapsed_time(t0, t1)
+    time.sleep(2)
+
+    print("LBP:")
+    t0 = cv.getTickCount()
     cats_lbp = cat_cascade_lbp.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+    t1 = cv.getTickCount()
+    compute_elapsed_time(t0, t1)
 
     for (x, y, w, h) in cats:  # blue = haar
         img = cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -76,6 +92,11 @@ def cat_face_detect(file):
     cv.imshow('win', img)
     cv.waitKey(0)
     cv.destroyAllWindows()
+
+
+def compute_elapsed_time(t0, t1):
+    secs = (t1 - t0) / cv.getTickFrequency()
+    print("Elapsed time: {} seconds".format(secs))
 
 
 def face_detect():
