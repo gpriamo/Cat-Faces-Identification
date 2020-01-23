@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 print(cv.__version__)
-img = cv.imread('../images/Cat03.jpg')
+img = cv.imread('../images/random/Cat03.jpg')
 px = img[100,100]
 print(px)
 
@@ -14,8 +14,8 @@ print(blue)
 print(img.size)
 print(img.dtype)
 
-img2 = cv.imread('../images/prince-cay-01.jpg')
-img2grey = cv.imread('../images/prince-cay-01.jpg', 0)
+img2 = cv.imread('../images/random/prince-cay-01.jpg')
+img2grey = cv.imread('../images/random/prince-cay-01.jpg', 0)
 cv.imshow('res',img2grey)
 plt.hist(img2grey.ravel(),256,[0,256])
 plt.show()

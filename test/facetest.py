@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 
-models_dir = '../models/'
+models_dir = '../models/detection/'
 # try: SF= 1.1 - N = 5
 SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
 N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
@@ -46,7 +46,12 @@ def image_resize(image, width=None, height=None, inter=cv.INTER_AREA):
 def cat_face_detect(file):
     im_orig = cv.imread(file)
 
-    img = image_resize(im_orig, 512, 512)
+    #img = image_resize(im_orig, 512, 512)
+
+    # recognizer = cv.face.LBPHFaceRecognizer_create()
+    # print(recognizer.train())
+
+    img = im_orig
 
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     cat_cascade = cv.CascadeClassifier(models_dir + 'haarcascade_frontalcatface.xml')
@@ -100,7 +105,7 @@ def compute_elapsed_time(t0, t1):
 
 
 def face_detect():
-    img = cv.imread('../images/rami.jpg')
+    img = cv.imread('../images/random/rami.jpg')
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     face_cascade = cv.CascadeClassifier(models_dir + 'haarcascade_frontalface_default.xml')
     eye_cascade = cv.CascadeClassifier(models_dir + 'haarcascade_eye.xml')
