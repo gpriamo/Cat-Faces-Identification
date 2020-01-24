@@ -8,6 +8,77 @@ N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
 cascade_models_dir = '../models/detection/'
 cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_extended.xml',
                 'lbpcascade_frontalcatface.xml']
+eye_cascade_model = cascade_models_dir + 'haarcascade_eye.xml'
+
+
+def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N,
+                    eyes_ScaleFactor=1.1, eyes_minNeighbors=3, eyes_minSize=(0, 0)):
+    """
+    Cat face detection utility.
+
+    :param file : str
+        The name of the image file to detect the face from.
+    :param classifier : int
+        Integer used to select the type of detector model to be used:
+        0 = haarcascade_frontalcatface.xml
+        1 = haarcascade_frontalcatface_extended.xml
+        2 = lbpcascade_frontalcatface.xml
+    :param show: bool
+        set to True to see an output image
+    :param scaleFactor: float
+        Scale factor value the detector should use
+    :param minNeighbors : int
+        Min neighbors value the detector should use
+    :param eyes_ScaleFactor: float
+        scaleFactor value the eyes detector should use
+    :param eyes_minNeighbors:
+        minNeighbors value the eyes detector should use
+    :param eyes_minSize:
+        minSize value the eyes detector should use
+    :return a list of rectangles containing the detected features
+    """
+
+    cat_cascade = cv.CascadeClassifier(cascade_models_dir + cat_cascades[classifier])
+    eye_cascade = cv.CascadeClassifier(eye_cascade_model)
+
+    if cat_cascade.empty():
+        raise RuntimeError('The face classifier was not loaded correctly!')
+
+    if eye_cascade.empty():
+        raise RuntimeError('The eye classifier was not loaded correctly!')
+
+    img = cv.imread(file)
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+    face = cat_cascade.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+
+    for (x, y, w, h) in face:  # blue
+        img = cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        roi_gray = gray[y:y + h, x:x + w]
+        roi_color = img[y:y + h, x:x + w]
+        eyes = eye_cascade.detectMultiScale(roi_gray,
+                                            scaleFactor=eyes_ScaleFactor,
+                                            minNeighbors=eyes_minNeighbors,
+                                            minSize=eyes_minSize)
+        if len(eyes) == 0:
+            print("No eyes detected")
+        elif len(eyes) == 1:
+            print("Only 1 eye (possibly) detected")
+        elif len(eyes) > 2:
+            print("More than 2 eyes (?) detected")
+
+        for (ex, ey, ew, eh) in eyes:
+            cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
+
+    if show:
+        cv.namedWindow('win', cv.WINDOW_NORMAL)
+        # cv.resizeWindow('win', 1980, 1800)
+
+        cv.imshow('win', img)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+
+    return face
 
 
 def resize_image(image, width=None, height=None, inter=cv.INTER_AREA):
