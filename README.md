@@ -2,6 +2,10 @@
 Biometric Systems Project 2020
 
 
+### Dependencies ###
+- opencv-contrib-python       
+- opencv-python
+- PIL 
 
 ## TODO ##
 ### Phase 1 ###
