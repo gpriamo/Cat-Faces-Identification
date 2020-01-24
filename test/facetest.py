@@ -43,10 +43,10 @@ def image_resize(image, width=None, height=None, inter=cv.INTER_AREA):
     return resized
 
 
-def cat_face_detect(file):
+def cat_face_detect(file, det=0):
     im_orig = cv.imread(file)
 
-    #img = image_resize(im_orig, 512, 512)
+    # img = image_resize(im_orig, 512, 512)
 
     # recognizer = cv.face.LBPHFaceRecognizer_create()
     # print(recognizer.train())
@@ -57,6 +57,7 @@ def cat_face_detect(file):
     cat_cascade = cv.CascadeClassifier(models_dir + 'haarcascade_frontalcatface.xml')
     cat_cascade_ext = cv.CascadeClassifier(models_dir + 'haarcascade_frontalcatface_extended.xml')
     cat_cascade_lbp = cv.CascadeClassifier(models_dir + 'lbpcascade_frontalcatface.xml')
+    eye_cascade = cv.CascadeClassifier(models_dir + 'haarcascade_eye.xml')
 
     print(cat_cascade.empty())
     print(cat_cascade_ext.empty())
@@ -82,14 +83,40 @@ def cat_face_detect(file):
     t1 = cv.getTickCount()
     compute_elapsed_time(t0, t1)
 
-    for (x, y, w, h) in cats:  # blue = haar
-        img = cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    if det == 0:
+        for (x, y, w, h) in cats:  # blue = haar
+            img = cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            roi_gray = gray[y:y + h, x:x + w]
+            roi_color = img[y:y + h, x:x + w]
+            # eyes = eye_cascade.detectMultiScale(roi_gray)
+            # eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.08, minNeighbors=3)
+            eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.08, minNeighbors=3, minSize=(40, 40))
+            print(len(eyes))
+            for (ex, ey, ew, eh) in eyes:
+                cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
 
-    for (x, y, w, h) in cats_ext:  # green = haar ext
-        img = cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    elif det == 1:
+        for (x, y, w, h) in cats_ext:  # green = haar ext
+            img = cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            roi_gray = gray[y:y + h, x:x + w]
+            roi_color = img[y:y + h, x:x + w]
+            eyes = eye_cascade.detectMultiScale(roi_gray)
+            # eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.2, minNeighbors=5)
+            print(len(eyes))
+            for (ex, ey, ew, eh) in eyes:
+                cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
 
-    for (x, y, w, h) in cats_lbp:  # red = LBP
-        img = cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    else:
+        for (x, y, w, h) in cats_lbp:  # red = LBP
+            img = cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            roi_gray = gray[y:y + h, x:x + w]
+            roi_color = img[y:y + h, x:x + w]
+            eyes = eye_cascade.detectMultiScale(roi_gray)
+
+            # eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.2, minNeighbors=5)
+            print(len(eyes))
+            for (ex, ey, ew, eh) in eyes:
+                cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
 
     cv.namedWindow('win', cv.WINDOW_NORMAL)
     # cv.resizeWindow('win', 1980, 1800)
@@ -145,10 +172,12 @@ def face_detect():
 
 
 if __name__ == '__main__':
-    imdir = '../images'
+    imdir = '../images/random/'
 
     images = [os.path.join(imdir, f) for f in os.listdir(imdir) if
               os.path.isfile(os.path.join(imdir, f))]
 
+    print(images)
+
     for im in images:
-        cat_face_detect(im)
+        cat_face_detect(im, 0)
