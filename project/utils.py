@@ -5,15 +5,15 @@ from matplotlib import pyplot as plt
 import os
 from PIL import Image
 
-SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
-N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
+#def_SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
+#def_N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
 cascade_models_dir = '../models/detection/'
 cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_extended.xml',
                 'lbpcascade_frontalcatface.xml']
 eye_cascade_model = cascade_models_dir + 'haarcascade_eye.xml'
 
 
-def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N,
+def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors=2,
                     eyes_ScaleFactor=1.08, eyes_minNeighbors=3, eyes_minSize=(40, 40)):
     """
     Cat face detection utility.
@@ -77,7 +77,9 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N
             print("No eyes detected")
         elif len(eyes) == 1:
             print("Only 1 eye (possibly) detected")
-        elif len(eyes) > 2:
+        elif len(eyes) == 2:
+            print("2 eyes detected!")
+        else:
             print("More than 2 eyes (?) detected")
 
         for (ex, ey, ew, eh) in eyes:
