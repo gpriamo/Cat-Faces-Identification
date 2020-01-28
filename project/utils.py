@@ -56,10 +56,17 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N
     img = cv.imread(file)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    face = cat_cascade.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+    face = cat_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
+
+    if classifier == 0:
+        col = (255, 0, 0)
+    elif classifier == 1:
+        col = (0, 255, 0)
+    else:
+        col = (0, 0, 255)
 
     for (x, y, w, h) in face:  # blue
-        img = cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        img = cv.rectangle(img, (x, y), (x + w, y + h), col, 2)
         roi_gray = gray[y:y + h, x:x + w]
         roi_color = img[y:y + h, x:x + w]
         eyes = eye_cascade.detectMultiScale(roi_gray,
