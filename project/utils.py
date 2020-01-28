@@ -200,11 +200,43 @@ def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.3, 0.3), des
 
 
 if __name__ == '__main__':
-    """Main for testing purposes"""
-    imdir = ''
+    """Main for image cropping & testing purposes"""
 
-    images = [os.path.join(imdir, f) for f in os.listdir(imdir) if
-              os.path.isfile(os.path.join(imdir, f))]
+    out_dir = "../images/dataset/cropped/"
 
-    for im in images:
-        detect_cat_face(im, 0, show=True)
+    image = "../images/dataset/unprocessed/c/c10.jpeg"
+    split = image.split("/")
+    dir_name = split[-2]
+    file_name = split[-1].split(".")[0]
+    file_extension = split[-1].split(".")[1]
+
+    save_dir = out_dir + dir_name + "/"
+
+    out = detect_cat_face(image, classifier=2, show=True, scaleFactor=1.02, minNeighbors=2)
+    if len(out) == 2:
+        face = out[0]
+        # show_image(img)
+
+        # transform image into a PIL Image (for face Alignment)
+        trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
+        im_pil = Image.fromarray(trans)
+
+        eye1 = out[1][0]
+        eye2 = out[1][1]
+        # print("eye1 = {0} -- eye2 = {1}".format(eye1, eye2))
+        left_eye = np.minimum(eye1, eye2)
+        right_eye = eye2 if np.array_equal(left_eye, eye1) else eye1
+        # print(left_eye)
+        # print(right_eye)
+
+        im = AlignFace(im_pil,
+                       eye_left=(int(left_eye[0]), int(left_eye[1])),
+                       eye_right=(int(right_eye[0]), int(right_eye[1])))
+
+        # im.show()
+        # show_image(face)
+
+        im_np = np.asarray(im_pil)
+
+        cv.imwrite(save_dir + file_name + "_cropped" + ".jpg", face)
+        im.save(save_dir + file_name + "_cropped_aligned." + file_extension, file_extension.upper())
