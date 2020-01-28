@@ -199,6 +199,15 @@ def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.3, 0.3), des
     return img
 
 
+def show_image(im):
+    cv.namedWindow('win', cv.WINDOW_NORMAL)
+    # cv.resizeWindow('win', 1980, 1800)
+
+    cv.imshow('win', im)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
+
 if __name__ == '__main__':
     """Main for image cropping & testing purposes"""
 
