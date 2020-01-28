@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 import os
 from PIL import Image
 
-#def_SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
-#def_N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
+# def_SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
+# def_N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
 cascade_models_dir = '../models/detection/'
 cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_extended.xml',
                 'lbpcascade_frontalcatface.xml']
@@ -37,7 +37,7 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
         minNeighbors value the eyes detector should use
     :param eyes_minSize:
         minSize value the eyes detector should use
-    :return a list of rectangles containing the detected features
+    :return the cropped face and the location of the eyes, if detected, else None.
     """
 
     detector = cat_cascades[classifier]
@@ -54,6 +54,9 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
         raise RuntimeError('The eye classifier was not loaded correctly!')
 
     img = cv.imread(file)
+
+    img_orig = cv.imread(file)
+
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
     face = cat_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
@@ -79,6 +82,9 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
             print("Only 1 eye (possibly) detected")
         elif len(eyes) == 2:
             print("2 eyes detected!")
+            cropped = img_orig[y:y + h, x: x + w]
+
+            return [cropped, eyes]
         else:
             print("More than 2 eyes (?) detected")
 
@@ -93,7 +99,7 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
         cv.waitKey(0)
         cv.destroyAllWindows()
 
-    return face
+    return None
 
 
 def resize_image(img, width=None, height=None, inter=cv.INTER_AREA):
@@ -167,7 +173,7 @@ def ScaleRotateTranslate(img, angle, center=None, new_center=None, scale=None, r
     return img.transform(img.size, Image.AFFINE, (a, b, c, d, e, f), resample=resample)
 
 
-def CropFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), dest_sz=(70, 70)):
+def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.3, 0.3), dest_sz=(200, 200)):
     # calculate offsets in original image
     offset_h = math.floor(float(offset_pct[0]) * dest_sz[0])
     offset_v = math.floor(float(offset_pct[1]) * dest_sz[1])
@@ -183,11 +189,11 @@ def CropFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), dest
     scale = float(dist) / float(reference)
     # rotate original around the left eye
     img = ScaleRotateTranslate(img, center=eye_left, angle=rotation)
-    # crop the rotated image
-    crop_xy = (eye_left[0] - scale * offset_h, eye_left[1] - scale * offset_v)
-    crop_size = (dest_sz[0] * scale, dest_sz[1] * scale)
-    img = img.crop(
-        (int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0] + crop_size[0]), int(crop_xy[1] + crop_size[1])))
+    # crop the rotated image - [Not needed as the image is already cropped]
+    # crop_xy = (eye_left[0] - scale * offset_h, eye_left[1] - scale * offset_v)
+    # crop_size = (dest_sz[0] * scale, dest_sz[1] * scale)
+    # img = img.crop(
+    #     (int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0] + crop_size[0]), int(crop_xy[1] + crop_size[1])))
     # resize it
     img = img.resize(dest_sz, Image.ANTIALIAS)
     return img
