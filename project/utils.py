@@ -14,7 +14,7 @@ eye_cascade_model = cascade_models_dir + 'haarcascade_eye.xml'
 
 
 def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N,
-                    eyes_ScaleFactor=1.1, eyes_minNeighbors=3, eyes_minSize=(0, 0)):
+                    eyes_ScaleFactor=1.08, eyes_minNeighbors=3, eyes_minSize=(40, 40)):
     """
     Cat face detection utility.
 
@@ -40,7 +40,11 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N
     :return a list of rectangles containing the detected features
     """
 
-    cat_cascade = cv.CascadeClassifier(cascade_models_dir + cat_cascades[classifier])
+    detector = cat_cascades[classifier]
+    print("Chosen classifier: " + detector)
+    print("SF={0}, minN={1}".format(scaleFactor, minNeighbors))
+
+    cat_cascade = cv.CascadeClassifier(cascade_models_dir + detector)
     eye_cascade = cv.CascadeClassifier(eye_cascade_model)
 
     if cat_cascade.empty():
@@ -83,11 +87,11 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=SF, minNeighbors=N
     return face
 
 
-def resize_image(image, width=None, height=None, inter=cv.INTER_AREA):
+def resize_image(img, width=None, height=None, inter=cv.INTER_AREA):
     """
     Resizes an image according to the specified parameters.
 
-    :param image: image
+    :param img: image
         image to resize
     :param width: int
         output width
@@ -100,12 +104,12 @@ def resize_image(image, width=None, height=None, inter=cv.INTER_AREA):
     # initialize the dimensions of the image to be resized and
     # grab the image size
     dim = None
-    (h, w) = image.shape[:2]
+    (h, w) = img.shape[:2]
 
     # if both the width and height are None, then return the
     # original image
     if width is None and height is None:
-        return image
+        return img
 
     # check to see if the width is None
     if width is None:
@@ -122,7 +126,7 @@ def resize_image(image, width=None, height=None, inter=cv.INTER_AREA):
         dim = (width, int(h * r))
 
     # resize the image
-    resized = cv.resize(image, dim, interpolation=inter)
+    resized = cv.resize(img, dim, interpolation=inter)
 
     # return the resized image
     return resized
@@ -134,9 +138,9 @@ def Distance(p1, p2):
     return math.sqrt(dx * dx + dy * dy)
 
 
-def ScaleRotateTranslate(image, angle, center=None, new_center=None, scale=None, resample=Image.BICUBIC):
+def ScaleRotateTranslate(img, angle, center=None, new_center=None, scale=None, resample=Image.BICUBIC):
     if (scale is None) and (center is None):
-        return image.rotate(angle=angle, resample=resample)
+        return img.rotate(angle=angle, resample=resample)
     nx, ny = x, y = center
     sx = sy = 1.0
     if new_center:
@@ -151,10 +155,10 @@ def ScaleRotateTranslate(image, angle, center=None, new_center=None, scale=None,
     d = -sine / sy
     e = cosine / sy
     f = y - nx * d - ny * e
-    return image.transform(image.size, Image.AFFINE, (a, b, c, d, e, f), resample=resample)
+    return img.transform(img.size, Image.AFFINE, (a, b, c, d, e, f), resample=resample)
 
 
-def CropFace(image, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), dest_sz=(70, 70)):
+def CropFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), dest_sz=(70, 70)):
     # calculate offsets in original image
     offset_h = math.floor(float(offset_pct[0]) * dest_sz[0])
     offset_v = math.floor(float(offset_pct[1]) * dest_sz[1])
@@ -169,15 +173,15 @@ def CropFace(image, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), de
     # scale factor
     scale = float(dist) / float(reference)
     # rotate original around the left eye
-    image = ScaleRotateTranslate(image, center=eye_left, angle=rotation)
+    img = ScaleRotateTranslate(img, center=eye_left, angle=rotation)
     # crop the rotated image
     crop_xy = (eye_left[0] - scale * offset_h, eye_left[1] - scale * offset_v)
     crop_size = (dest_sz[0] * scale, dest_sz[1] * scale)
-    image = image.crop(
+    img = img.crop(
         (int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0] + crop_size[0]), int(crop_xy[1] + crop_size[1])))
     # resize it
-    image = image.resize(dest_sz, Image.ANTIALIAS)
-    return image
+    img = img.resize(dest_sz, Image.ANTIALIAS)
+    return img
 
 
 if __name__ == '__main__':
