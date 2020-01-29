@@ -68,6 +68,8 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
     else:
         col = (0, 0, 255)
 
+    cropped = None
+
     for (x, y, w, h) in face:  # blue
         img = cv.rectangle(img, (x, y), (x + w, y + h), col, 2)
         roi_gray = gray[y:y + h, x:x + w]
@@ -76,20 +78,24 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
                                             scaleFactor=eyes_ScaleFactor,
                                             minNeighbors=eyes_minNeighbors,
                                             minSize=eyes_minSize)
+
+        for (ex, ey, ew, eh) in eyes:
+            cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
+
         if len(eyes) == 0:
             print("No eyes detected")
         elif len(eyes) == 1:
             print("Only 1 eye (possibly) detected")
+            cropped = img_orig[y:y + h, x: x + w]
+
         elif len(eyes) == 2:
             print("2 eyes detected!")
             cropped = img_orig[y:y + h, x: x + w]
 
-            return [cropped, eyes]
+            cropped = [cropped, eyes]
         else:
             print("More than 2 eyes (?) detected")
-
-        for (ex, ey, ew, eh) in eyes:
-            cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
+            cropped = img_orig[y:y + h, x: x + w]
 
     if show:
         cv.namedWindow('win', cv.WINDOW_NORMAL)
@@ -99,7 +105,7 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
         cv.waitKey(0)
         cv.destroyAllWindows()
 
-    return None
+    return cropped
 
 
 def resize_image(img, width=None, height=None, inter=cv.INTER_AREA):
