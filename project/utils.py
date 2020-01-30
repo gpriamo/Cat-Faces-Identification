@@ -205,6 +205,39 @@ def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.3, 0.3), des
     return img
 
 
+def create_csv(base_path):
+    """
+    Creates the CSV file needed to train the recognizers.
+
+    :param base_path:
+        directory where all the training images are stored.
+    """
+    label = 0
+    separator = ";"
+
+    print("Creating CSV file...")
+
+    lines = []
+    lines_aligned = []
+
+    for dir_name, dir_names, file_names in os.walk(base_path):
+        for subdir_name in dir_names:
+            subject_path = os.path.join(dir_name, subdir_name)
+            for filename in os.listdir(subject_path):
+                abs_path = "%s/%s" % (subject_path, filename)
+                s = "%s%s%d" % (abs_path, separator, label)
+                if "aligned" in s:
+                    lines_aligned.append(s)
+                else:
+                    lines.append(s)
+            label = label + 1
+
+    with open("subjects.csv", "w+") as fl:
+        fl.write(str.join("\n", lines))
+    with open("subjects_aligned.csv", "w+") as fl:
+        fl.write(str.join("\n", lines_aligned))
+
+
 def show_image(im):
     cv.namedWindow('win', cv.WINDOW_NORMAL)
     # cv.resizeWindow('win', 1980, 1800)
