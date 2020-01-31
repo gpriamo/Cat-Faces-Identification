@@ -61,7 +61,6 @@ def train_recongizer(csv_filename):
 
     model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()  # TODO check params
 
-    # If this gives problems, just use faces instead of array
     model.train(faces, np.array(labels))
 
     print("train finished")
@@ -92,13 +91,8 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, sample_label=None,
     eigenvectors: np.ndarray = model.getEigenVectors()
     mean = model.getMean()
 
-    # normalized_mean = norm_0_255(mean.reshape(1, height))
-
-    # reshaped = np.reshape(mean, (1, height))
-    # print(mean.shape)
-    reshaped = mean.reshape(height, -1)
-
-    normalized_mean = norm_0_255(reshaped)
+    reshaped_mean = mean.reshape(height, -1)
+    normalized_mean = norm_0_255(reshaped_mean)
 
     if show_mean:
         show_image(normalized_mean)
@@ -139,4 +133,3 @@ if __name__ == '__main__':
             show_mean=True, show_faces=True)
     predict(model=mod, height=hei, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", sample_label=0,
             show_mean=True, show_faces=True)
-    # "../images/dataset/cropped/", "../images/output/eigenfaces/"
