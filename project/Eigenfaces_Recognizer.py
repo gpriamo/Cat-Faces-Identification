@@ -3,6 +3,8 @@ import os
 import cv2.cv2 as cv
 import numpy as np
 
+models_dir = "../models/recognition/"
+
 
 def norm_0_255(source: np.ndarray):
     src = source.copy()
@@ -117,6 +119,20 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, sample_label=None,
     # TODO Think about writing the reconstruction part
 
 
+def save_model(model, height, uid=0):
+    file_name = models_dir+"eigenfaces/model_{0}_{1}.xml".format(uid, height)
+    print("Saving model to: ", file_name)
+    model.save(file_name)
+
+
+def load_model(file_name):
+    model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
+    model.read(file_name)
+    height = file_name.split("_")[-1].split(".")[0]
+
+    return model, int(height)
+
+
 def show_image(image):
     cv.namedWindow('output', cv.WINDOW_NORMAL)
     # cv.resizeWindow('win', 1980, 1800)
@@ -128,8 +144,15 @@ def show_image(image):
 
 if __name__ == '__main__':
     mod, hei = train_recongizer("./subjects_aligned.csv")
-    # TODO implement savemodel & loadmodel
     predict(model=mod, height=hei, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", sample_label=1,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False)
     predict(model=mod, height=hei, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", sample_label=0,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False)
+
+    save_model(mod, hei)
+
+    # mod2, hei2 = load_model(models_dir+"eigenfaces/model_0_200.xml")
+    # predict(model=mod2, height=hei2, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", sample_label=1,
+    #         show_mean=False, show_faces=False)
+    # predict(model=mod2, height=hei2, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", sample_label=0,
+    #         show_mean=False, show_faces=False)
