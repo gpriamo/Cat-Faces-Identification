@@ -144,7 +144,8 @@ def resize_image(img, width=None, height=None, inter=cv.INTER_AREA):
         # calculate the ratio of the width and construct the
         # dimensions
         r = width / float(w)
-        dim = (width, int(h * r))
+        # dim = (width, int(h * r))
+        dim = (width, round(h * r))
 
     # resize the image
     resized = cv.resize(img, dim, interpolation=inter)
