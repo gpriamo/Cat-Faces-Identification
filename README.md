@@ -13,5 +13,7 @@ Biometric Systems Project 2020
 - [ ] Test per identification
 ### Phase 2 ### 
 - [ ] Performance evaluation (all vs all matrix)
+1) K-Fold cross validation (see Lesson2-bis)
+2) All against all distance matrix for identification open set (see Lesson2-bis)
 ### Phase 3 ### 
 - [ ] Report
