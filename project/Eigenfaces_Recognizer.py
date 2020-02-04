@@ -120,7 +120,7 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, sample_label=None,
 
 
 def save_model(model, height, uid=0):
-    file_name = models_dir+"eigenfaces/model_{0}_{1}.xml".format(uid, height)
+    file_name = models_dir + "eigenfaces/model_{0}_{1}.xml".format(uid, height)
     print("Saving model to: ", file_name)
     model.save(file_name)
 
