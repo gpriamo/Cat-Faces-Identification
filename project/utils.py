@@ -197,11 +197,11 @@ def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), des
     scale = float(dist) / float(reference)
     # rotate original around the left eye
     img = ScaleRotateTranslate(img, center=eye_left, angle=rotation)
-    # crop the rotated image - [Not needed as the image is already cropped]
-    # crop_xy = (eye_left[0] - scale * offset_h, eye_left[1] - scale * offset_v)
-    # crop_size = (dest_sz[0] * scale, dest_sz[1] * scale)
-    # img = img.crop(
-    #     (int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0] + crop_size[0]), int(crop_xy[1] + crop_size[1])))
+    # crop the rotated image
+    crop_xy = (eye_left[0] - scale * offset_h, eye_left[1] - scale * offset_v)
+    crop_size = (dest_sz[0] * scale, dest_sz[1] * scale)
+    img = img.crop(
+        (int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0] + crop_size[0]), int(crop_xy[1] + crop_size[1])))
     # resize it
     img = img.resize(dest_sz, Image.ANTIALIAS)
     return img
