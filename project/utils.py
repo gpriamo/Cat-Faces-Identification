@@ -1,7 +1,6 @@
 import math
 import cv2.cv2 as cv
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 from PIL import Image
 
@@ -11,6 +10,8 @@ cascade_models_dir = '../models/detection/'
 cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_extended.xml',
                 'lbpcascade_frontalcatface.xml']
 eye_cascade_model = cascade_models_dir + 'haarcascade_eye.xml'
+subject_to_name_file = '../images/dataset/cropped/subject-to-name.txt'
+subject_to_name = None
 
 
 def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors=2,
@@ -213,7 +214,7 @@ def create_csv(base_path):
     :param base_path:
         directory where all the training images are stored.
     """
-    label = 0
+    label = 1
     separator = ";"
 
     print("Creating CSV file...")
@@ -237,6 +238,28 @@ def create_csv(base_path):
         fl.write(str.join("\n", lines))
     with open("subjects_aligned.csv", "w+") as fl:
         fl.write(str.join("\n", lines_aligned))
+
+
+def _get_subject_mapping():
+    ret = dict()
+    with open(subject_to_name_file, "r+") as fl:
+        for line in fl.readlines():
+            spl = line.split("\t")
+            ret[spl[0]] = spl[1].replace("\n", "")
+    return ret
+
+
+def get_subject_name(label):
+    global subject_to_name
+
+    if subject_to_name is None:
+        subject_to_name = _get_subject_mapping()
+
+    key = "s"+str(label)
+    if key in subject_to_name:
+        return subject_to_name[key]
+    else:
+        return "Impostor"
 
 
 def show_image(im):
