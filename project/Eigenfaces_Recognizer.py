@@ -41,7 +41,7 @@ def read_csv(filename, resize=False):
             # {BEGIN} TOREMOVE
             if label not in dic.keys():
                 dic[label] = 1
-            elif dic[label] > 10:
+            elif dic[label] >= 10:
                 continue
             dic[label] += 1
             # {END} TOREMOVE
@@ -55,7 +55,7 @@ def read_csv(filename, resize=False):
             labels.append(label)
 
     # {BEGIN} TOREMOVE
-    print(dic)
+    # print(dic)
     # {END} TOREMOVE
     return faces, labels
 
@@ -66,6 +66,11 @@ def train_recongizer(csv_filename, resize=False):
     print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(labels)))
 
     height = faces[0].shape[0]
+
+    # sizes = set()
+    # for image in faces:
+    #     sizes.add(image.shape)
+    # print(sizes)
 
     model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()  # TODO check params
 
@@ -95,10 +100,11 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
 
     prediction = model.predict(input_face)
 
-    if sample_label is not None:
-        print("Predicted class = {0} with confidence = {1}; Actual class = {2}.\n\t Result: {3}"
-              .format(prediction[0], prediction[1], sample_label,
-                      "Success!" if prediction[0] == sample_label else "Failure!"))
+    if probe_label is not None:
+        print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
+              .format(prediction[0], utils.get_subject_name(prediction[0]), prediction[1],
+                      probe_label, utils.get_subject_name(probe_label),
+                      "Success!" if prediction[0] == probe_label else "Failure!"))
 
     eigenvalues: np.ndarray = model.getEigenValues()
     eigenvectors: np.ndarray = model.getEigenVectors()
