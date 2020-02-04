@@ -3,6 +3,8 @@ import os
 import cv2.cv2 as cv
 import numpy as np
 
+from project import utils
+
 models_dir = "../models/recognition/"
 
 
@@ -21,7 +23,7 @@ def norm_0_255(source: np.ndarray):
     return dst
 
 
-def read_csv(filename):
+def read_csv(filename, resize=False):
     labels = []
     faces = []
 
@@ -33,8 +35,7 @@ def read_csv(filename):
         for line in file.readlines():
             spl = line.split(";")
 
-            # TODO resize images if using i.jpg
-
+            im_file = spl[0]
             label = int(spl[1])
 
             # {BEGIN} TOREMOVE
@@ -45,7 +46,12 @@ def read_csv(filename):
             dic[label] += 1
             # {END} TOREMOVE
 
-            faces.append(cv.imread(spl[0], 0))
+            photo = cv.imread(im_file, 0)
+
+            if resize:
+                photo = utils.resize_image(photo, 100, 100)
+
+            faces.append(photo)
             labels.append(label)
 
     # {BEGIN} TOREMOVE
@@ -54,8 +60,8 @@ def read_csv(filename):
     return faces, labels
 
 
-def train_recongizer(csv_filename):
-    faces, labels = read_csv(csv_filename)
+def train_recongizer(csv_filename, resize=False):
+    faces, labels = read_csv(csv_filename, resize)
 
     print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(labels)))
 
@@ -70,18 +76,23 @@ def train_recongizer(csv_filename):
     return model, height
 
 
-def predict(model: cv.face_BasicFaceRecognizer, height, face, sample_label=None,
+def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, resize=False,
             save_dir=None,
             show_mean=False,
             save_mean=False,
             show_faces=False,
             save_faces=False
             ):
-
     if not os.path.exists(face):
         raise RuntimeError("File {} does not exist!".format(face))
 
     input_face = cv.imread(face, 0)
+
+    if resize:
+        input_face = utils.resize_image(input_face, 100, 100)
+
+    # print(input_face.shape)
+
     prediction = model.predict(input_face)
 
     if sample_label is not None:
