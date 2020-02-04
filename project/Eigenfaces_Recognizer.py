@@ -55,7 +55,7 @@ def read_csv(filename, resize=False):
             labels.append(label)
 
     # {BEGIN} TOREMOVE
-    # print(dic)
+    print(dic)
     # {END} TOREMOVE
     return faces, labels
 
