@@ -181,7 +181,7 @@ def ScaleRotateTranslate(img, angle, center=None, new_center=None, scale=None, r
     return img.transform(img.size, Image.AFFINE, (a, b, c, d, e, f), resample=resample)
 
 
-def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.3, 0.3), dest_sz=(200, 200)):
+def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), dest_sz=(200, 200)):
     # calculate offsets in original image
     offset_h = math.floor(float(offset_pct[0]) * dest_sz[0])
     offset_v = math.floor(float(offset_pct[1]) * dest_sz[1])
@@ -224,8 +224,16 @@ def create_csv(base_path):
 
     for dir_name, dir_names, file_names in os.walk(base_path):
         for subdir_name in dir_names:
+
+            if subdir_name == 'test':
+                continue
+
             subject_path = os.path.join(dir_name, subdir_name)
             for filename in os.listdir(subject_path):
+
+                if not os.path.isfile(os.path.join(subject_path, filename)):
+                    continue
+
                 abs_path = "%s/%s" % (subject_path, filename)
                 s = "%s%s%d" % (abs_path, separator, label)
                 if "aligned" in s:
@@ -233,6 +241,9 @@ def create_csv(base_path):
                 else:
                     lines.append(s)
             label = label + 1
+
+    lines_aligned.sort(key=lambda l: (l.split("/")[-2], int(l.split("/")[-1].split("_")[0])))
+    lines.sort(key=lambda l: (l.split("/")[-2], int(l.split("/")[-1].split(".")[0])))
 
     with open("subjects.csv", "w+") as fl:
         fl.write(str.join("\n", lines))
@@ -289,9 +300,9 @@ if __name__ == '__main__':
         face = out[0]
         # show_image(img)
 
-        # transform image into a PIL Image (for face Alignment)
-        trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
-        im_pil = Image.fromarray(trans)
+            # transform image into a PIL Image (for face Alignment)
+            trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
+            im_pil = Image.fromarray(trans)
 
         eye1 = out[1][0]
         eye2 = out[1][1]
