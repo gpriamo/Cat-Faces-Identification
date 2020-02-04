@@ -159,17 +159,34 @@ def show_image(image):
     cv.destroyAllWindows()
 
 
-if __name__ == '__main__':
-    mod, hei = train_recongizer("./subjects_aligned.csv")
-    predict(model=mod, height=hei, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", sample_label=1,
+def test_aligned():
+    mod, hei = train_recongizer("subjects_aligned.csv")
+    predict(model=mod, height=hei, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", probe_label=7,
             show_mean=False, show_faces=False)
-    predict(model=mod, height=hei, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", sample_label=0,
+    predict(model=mod, height=hei, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", probe_label=0,
+            show_mean=True, show_faces=True)
+    predict(model=mod, height=hei, face="../images/dataset/cropped/Rudi/9_cropped_aligned.jpeg", probe_label=5,
             show_mean=False, show_faces=False)
-
-    save_model(mod, hei)
+    # save_model(mod, hei)
 
     # mod2, hei2 = load_model(models_dir+"eigenfaces/model_0_200.xml")
     # predict(model=mod2, height=hei2, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", sample_label=1,
     #         show_mean=False, show_faces=False)
     # predict(model=mod2, height=hei2, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", sample_label=0,
     #         show_mean=False, show_faces=False)
+
+
+def test_cropped():
+    mod, hei = train_recongizer("subjects.csv", resize=True)
+    predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s1/27.jpg", probe_label=1,
+            show_mean=False, show_faces=False)
+    predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s2/10.jpg", probe_label=2,
+            show_mean=False, show_faces=False)
+    predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s8/22.jpg", probe_label=8,
+            show_mean=False, show_faces=False)
+    # save_model(mod, hei)
+
+
+if __name__ == '__main__':
+    # test_aligned()
+    test_cropped()
