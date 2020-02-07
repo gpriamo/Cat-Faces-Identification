@@ -175,7 +175,6 @@ def parse_args():
 
 if __name__ == '__main__':
     """Main for image cropping & testing purposes"""
-
     args = parse_args()
 
     out_dir = args.output
@@ -186,7 +185,7 @@ if __name__ == '__main__':
     # dir_name = split[-2]
     # file_name = split[-1].split(".")[0]
     # file_extension = split[-1].split(".")[1]
-
+    #
     # save_dir = out_dir + dir_name + "/"
 
     dir, file = path.split(image)

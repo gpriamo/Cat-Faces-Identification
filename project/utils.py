@@ -5,7 +5,7 @@ import os
 from os import path
 
 
-subject_to_name_file = '../images/dataset/cropped/subject-to-name.txt'
+subject_to_name_file = '../datasets/subject-to-name.txt'
 subject_to_name = None
 
 
