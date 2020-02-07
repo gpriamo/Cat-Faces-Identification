@@ -10,18 +10,18 @@ subject_to_name = None
 
 
 def show_image(im):
-    cv.namedWindow('win', cv.WINDOW_NORMAL)
-    # cv.resizeWindow('win', 1980, 1800)
+    # cv.namedWindow('win', cv.WINDOW_NORMAL)
+    # # cv.resizeWindow('win', 1980, 1800)
 
-    cv.imshow('win', im)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # cv.imshow('win', im)
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
 
     # show image using matplotlib instead of opencv
     #
-    # plt.figure()
-    # plt.imshow(cv.cvtColor(im, cv.COLOR_BGR2RGB))
-    # plt.show()
+    plt.figure()
+    plt.imshow(cv.cvtColor(im, cv.COLOR_BGR2RGB))
+    plt.show()
 
 
 def show_images(images):
