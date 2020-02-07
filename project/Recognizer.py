@@ -73,6 +73,9 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
             model.getThreshold())
         print(model_info)
 
+        histograms = model.getHistograms()
+        print("Size of the histograms: " + str(histograms[0].size))
+
         return
 
     if show_mean or save_mean:
