@@ -2,6 +2,7 @@ import cv2.cv2 as cv
 import math
 import matplotlib.pyplot as plt
 import os
+from os import path
 
 
 subject_to_name_file = '../images/dataset/cropped/subject-to-name.txt'
@@ -16,6 +17,8 @@ def show_image(im):
     cv.waitKey(0)
     cv.destroyAllWindows()
 
+    # show image using matplotlib instead of opencv
+    #
     # plt.figure()
     # plt.imshow(cv.cvtColor(im, cv.COLOR_BGR2RGB))
     # plt.show()
@@ -106,10 +109,10 @@ def create_csv(base_path, output_dir):
             if subdir_name == "test":
                 continue
 
-            subject_path = os.path.join(dir_name, subdir_name)
+            subject_path = path.join(dir_name, subdir_name)
             for filename in os.listdir(subject_path):
 
-                if not os.path.isfile(os.path.join(subject_path, filename)):
+                if not path.isfile(path.join(subject_path, filename)):
                     continue
 
                 abs_path = "%s/%s" % (subject_path, filename)
@@ -123,9 +126,9 @@ def create_csv(base_path, output_dir):
     lines_aligned.sort(key=lambda l: (l.split("/")[-2], int(l.split("/")[-1].split("_")[0])))
     lines.sort(key=lambda l: (l.split("/")[-2], int(l.split("/")[-1].split(".")[0])))
 
-    with open(output_dir + "/subjects.csv", "w+") as fl:
+    with open(path.join(output_dir, "subjects.csv"), "w+") as fl:
         fl.write(str.join("\n", lines))
-    with open(output_dir + "/subjects_aligned.csv", "w+") as fl:
+    with open(path.join(output_dir, "subjects_aligned.csv"), "w+") as fl:
         fl.write(str.join("\n", lines_aligned))
 
 

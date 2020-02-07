@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import cv2.cv2 as cv
 import math
 import numpy as np
+from os import path
 from PIL import Image
 
 from utils import *
@@ -13,7 +14,7 @@ from utils import *
 cascade_models_dir = '../models/detection/'
 cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_extended.xml',
                 'lbpcascade_frontalcatface.xml']
-eye_cascade_model = cascade_models_dir + 'haarcascade_eye.xml'
+eye_cascade_model = path.join(cascade_models_dir, 'haarcascade_eye.xml')
 
 
 def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors=2,
@@ -47,7 +48,7 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
     print("Chosen classifier: " + detector)
     print("SF={0}, minN={1}".format(scaleFactor, minNeighbors))
 
-    cat_cascade = cv.CascadeClassifier(cascade_models_dir + detector)
+    cat_cascade = cv.CascadeClassifier(path.join(cascade_models_dir, detector))
     eye_cascade = cv.CascadeClassifier(eye_cascade_model)
 
     if cat_cascade.empty():
@@ -180,12 +181,19 @@ if __name__ == '__main__':
     out_dir = args.output
     image = args.input_image
 
-    split = image.split("/")
-    dir_name = split[-2]
-    file_name = split[-1].split(".")[0]
-    file_extension = split[-1].split(".")[1]
+    # TODO Remove
+    # split = image.split("/")
+    # dir_name = split[-2]
+    # file_name = split[-1].split(".")[0]
+    # file_extension = split[-1].split(".")[1]
 
-    save_dir = out_dir + dir_name + "/"
+    # save_dir = out_dir + dir_name + "/"
+
+    dir, file = path.split(image)
+    dir_name = path.basename(dir)
+    file_name, file_extension = path.splitext(file)
+
+    save_dir = path.join(out_dir, dir_name)
 
     detector = args.detector
     sf = args.scalefactor
@@ -221,5 +229,5 @@ if __name__ == '__main__':
 
         im_np = np.asarray(im_pil)
 
-        cv.imwrite(save_dir + file_name + "_cropped." + file_extension, face)
-        im.save(save_dir + file_name + "_cropped_aligned." + file_extension)
+        cv.imwrite(path.join(save_dir, file_name + "_cropped" + file_extension), face)
+        im.save(path.join(save_dir, file_name + "_cropped_aligned" + file_extension))

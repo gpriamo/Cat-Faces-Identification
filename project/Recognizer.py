@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import cv2.cv2 as cv
 import numpy as np
-import os
+from os import path
 
 from utils import *
 
@@ -47,7 +47,7 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
             show_faces=False,
             save_faces=False
             ):
-    if not os.path.exists(face):
+    if not path.exists(face):
         raise RuntimeError("File {} does not exist!".format(face))
 
     input_face = cv.imread(face, 0)
@@ -84,7 +84,7 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
         if show_mean:
             show_image(normalized_mean)
         elif save_mean and save_dir is not None:
-            cv.imwrite(save_dir + "/mean.png", normalized_mean)
+            cv.imwrite(path.join(save_dir, "mean.png"), normalized_mean)
 
     if show_faces or save_faces:
         eigenvalues: np.ndarray = model.getEigenValues()
@@ -104,7 +104,8 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
             if show_faces:
                 faces.append(cgrayscale)
             elif save_faces and save_dir is not None:
-                cv.imwrite(save_dir + "/eigenface_{}.png".format(i), norm_0_255(cgrayscale))
+                file_name = path.join(save_dir, "eigenface_{}.png".format(i))
+                cv.imwrite(file_name, norm_0_255(cgrayscale))
 
         if show_faces:
             show_images(faces)
@@ -113,7 +114,7 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
 
 
 def save_model(model: cv.face_BasicFaceRecognizer, save_dir, height, uid=0):
-    file_name = save_dir + "/model_{0}_{1}.xml".format(uid, height)
+    file_name = path.join(save_dir, "model_{0}_{1}.xml".format(uid, height))
     print("Saving model to: ", file_name)
     model.save(file_name)
 
