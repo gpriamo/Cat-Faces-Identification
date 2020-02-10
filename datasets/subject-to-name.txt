@@ -8,3 +8,9 @@ s7	Roxy
 s8	Rudi
 s9	Shannon
 s10	Zelena
+s11	Tretus
+s12	Puffetta
+s13	Crystallino
+s14	Ciko
+s15	Bortolo
+s16	Appy
