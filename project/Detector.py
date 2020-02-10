@@ -133,7 +133,7 @@ def Distance(p1, p2):
     return math.sqrt(dx * dx + dy * dy)
 
 
-def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), dest_sz=(200, 200)):
+def AlignFace(img, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.3, 0.3), dest_sz=(200, 200)):
     # calculate offsets in original image
     offset_h = math.floor(float(offset_pct[0]) * dest_sz[0])
     offset_v = math.floor(float(offset_pct[1]) * dest_sz[1])
