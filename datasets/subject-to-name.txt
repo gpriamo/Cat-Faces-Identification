@@ -7,3 +7,4 @@ s6	Perla
 s7	Roxy
 s8	Rudi
 s9	Shannon
+s10	Zelena
