@@ -16,3 +16,4 @@ s15	Bortolo
 s16	Appy
 s17	Birba
 s18	Guppi
+s19	Koshka

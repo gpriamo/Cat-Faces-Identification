@@ -2,20 +2,26 @@ Notes:
 	C
 		Default: 1.05 SF && N = 2 det=0
 
-		c2	SF=1.02 && det =2
-		c4 	SF=1.02 && det =1
-		c10 SF=1.02 && det =2 (both eyes)
-		c16 SF=1.02 && det =1
-		c17 SF=1.01 && N=5 det =2
-		c18 (SF=1.01 && N=2 || SF = 1.005 && N = 5) && det =2
+		c16 SF=1.02 && det =1 -- OK
+		c4 	SF=1.02 && det =1 -- OK
+		c2	SF=1.02 && det =2 -- OK
+		c10 SF=1.02 && det =2 (both eyes) -- OK
+		c17 SF=1.01 && N=5 det =2 -- OK
+		c18 (SF=1.01 && N=2 || SF = 1.005 && N = 5) && det =2 -- OK
 		[c5 SF=1.0015 && N=3]
 	T
 		Default: 1.05 SF && N = 2 && det=0
 
-		t1	SF=1.05 && N=2 &&det=2
-		t11	SF=1.05 && N=2 &&det=2
+		t1	SF=1.05 && N=2 &&det=2  -- OK
+		t2	SF=1.05 && N=2 &&det=1 (both eyes) -- OK
+		t11	SF=1.05 && N=2 &&det=2 -- OK
 		t16	SF=1.05 && N=2 &&det=1
-		t2	SF=1.05 && N=2 &&det=1 (both eyes)
+
+		t18
+		t19
+		t23
+		t25
+		t26
 
 	E
 		Default: 1.05 SF && N = 2 && det=0
