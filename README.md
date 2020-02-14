@@ -6,11 +6,12 @@ Biometric Systems Project 2020
 - opencv-contrib-python       
 - opencv-python
 - PIL 
+- dlib
 
 ## TODO ##
 ### Phase 1 ###
-- [ ] Download immagini e creazione gallery
-- [ ] Test per identification
+- [x] Download immagini e creazione gallery
+- [ ] Lavoro
 ### Phase 2 ### 
 - [ ] Performance evaluation (all vs all matrix)
 1) K-Fold cross validation (see Lesson2-bis)
