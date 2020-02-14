@@ -132,7 +132,7 @@ def create_csv(base_path, output_dir):
         fl.write(str.join("\n", lines_aligned))
 
 
-def read_csv(filename, resize=False):
+def read_csv(filename, resize=False, rgb=False):
     labels = []
     faces = []
 
@@ -159,6 +159,10 @@ def read_csv(filename, resize=False):
 
             if resize:
                 photo = resize_image(photo, 100, 100)
+
+            if rgb:
+                # Convert input image from BGR to RGB (needed by dlib)
+                photo = cv.cvtColor(photo, cv.COLOR_BGR2RGB)
 
             faces.append(photo)
             labels.append(label)
