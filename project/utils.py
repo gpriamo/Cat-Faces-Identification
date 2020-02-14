@@ -7,6 +7,8 @@ from os import path
 
 subject_to_name_file = '../dataset_info/subject-to-name.txt'
 subject_to_name = None
+dataset_images_dir = '../images/dataset/cropped'
+dataset_info_dir = '../dataset_info/'
 
 
 def show_image(im):
@@ -193,3 +195,7 @@ def get_subject_name(label):
         return subject_to_name[key]
     else:
         return "Impostor"
+
+
+if __name__ == '__main__':
+    create_csv(dataset_images_dir, dataset_info_dir)
