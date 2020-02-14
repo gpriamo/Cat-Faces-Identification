@@ -17,3 +17,7 @@ s16	Appy
 s17	Birba
 s18	Guppi
 s19	Koshka
+s20	Mina
+s21	Pietra
+s22	Romeo
+s23	Sophie
