@@ -6,7 +6,6 @@ Biometric Systems Project 2020
 - opencv-contrib-python       
 - opencv-python
 - PIL 
-- dlib
 
 ## TODO ##
 ### Phase 1 ###
