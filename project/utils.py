@@ -117,11 +117,14 @@ def create_csv(base_path, output_dir):
         fl.write(str.join("\n", lines_aligned))
 
 
-def read_csv(filename, resize=False, rgb=False):
+def read_csv(filename, resize=False, rgb=False, mapping=False):
     labels = []
     faces = []
 
     with open(filename, "r+") as file:
+        if mapping:
+            label_to_file = dict()
+
         # {BEGIN} TOREMOVE
         dic = dict()
         # {END} TOREMOVE
@@ -140,6 +143,11 @@ def read_csv(filename, resize=False, rgb=False):
             dic[label] += 1
             # {END} TOREMOVE
 
+            if mapping:
+                if label not in label_to_file.keys():
+                    label_to_file[label] = []
+                label_to_file[label].append(im_file)
+
             photo = cv.imread(im_file, 0)
 
             if resize:
@@ -154,7 +162,14 @@ def read_csv(filename, resize=False, rgb=False):
 
     # {BEGIN} TOREMOVE
     print(dic)
+
+    # for key in label_to_file.keys():
+    #     print(key, label_to_file[key])
     # {END} TOREMOVE
+
+    if mapping:
+        return faces, labels, label_to_file
+
     return faces, labels
 
 
