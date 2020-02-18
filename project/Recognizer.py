@@ -40,7 +40,7 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Fa
     return model, height
 
 
-def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, resize=False,
+def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, resize=False, identification=True,
             save_dir=None,
             show_mean=False,
             save_mean=False,
@@ -54,6 +54,15 @@ def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, 
 
     if resize:
         input_face = resize_image(input_face, 100, 100)
+
+    if identification:
+        coll: cv.face_StandardCollector = cv.face.StandardCollector_create()
+        pred = model.predict_collect(input_face, coll)
+        # print(coll.getResults())
+        # print(coll.getMinDist())
+        # print(coll.getMinLabel())
+
+        return coll.getResults()
 
     prediction = model.predict(input_face)
 
