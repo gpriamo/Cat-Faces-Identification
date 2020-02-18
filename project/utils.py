@@ -124,6 +124,7 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
     with open(filename, "r+") as file:
         if mapping:
             label_to_file = dict()
+            files = []
 
         # {BEGIN} TOREMOVE
         dic = dict()
@@ -148,17 +149,20 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
                     label_to_file[label] = []
                 label_to_file[label].append(im_file)
 
-            photo = cv.imread(im_file, 0)
+                files.append(im_file)
 
-            if resize:
-                photo = resize_image(photo, 100, 100)
+            else:
+                photo = cv.imread(im_file, 0)
 
-            if rgb:
-                # Convert input image from BGR to RGB (needed by dlib)
-                photo = cv.cvtColor(photo, cv.COLOR_BGR2RGB)
+                if resize:
+                    photo = resize_image(photo, 100, 100)
 
-            faces.append(photo)
-            labels.append(label)
+                if rgb:
+                    # Convert input image from BGR to RGB (needed by dlib)
+                    photo = cv.cvtColor(photo, cv.COLOR_BGR2RGB)
+
+                faces.append(photo)
+                labels.append(label)
 
     # {BEGIN} TOREMOVE
     print(dic)
@@ -168,7 +172,7 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
     # {END} TOREMOVE
 
     if mapping:
-        return faces, labels, label_to_file
+        return label_to_file, files
 
     return faces, labels
 
