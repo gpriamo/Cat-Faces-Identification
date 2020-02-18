@@ -88,6 +88,7 @@ def create_csv(base_path, output_dir):
     lines_aligned = []
 
     for dir_name, dir_names, file_names in os.walk(base_path):
+        dir_names.sort(key=lambda l: int(l.replace('s', '')))
         for subdir_name in dir_names:
 
             if subdir_name == "test":
@@ -107,8 +108,8 @@ def create_csv(base_path, output_dir):
                     lines.append(s)
             label = label + 1
 
-    lines_aligned.sort(key=lambda l: (l.split("/")[-2], int(l.split("/")[-1].split("_")[0])))
-    lines.sort(key=lambda l: (l.split("/")[-2], int(l.split("/")[-1].split(".")[0])))
+    lines_aligned.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split("_")[0])))
+    lines.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split(".")[0])))
 
     with open(path.join(output_dir, "subjects.csv"), "w+") as fl:
         fl.write(str.join("\n", lines))
