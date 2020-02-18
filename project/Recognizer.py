@@ -139,13 +139,13 @@ def load_model(model: cv.face_BasicFaceRecognizer, file_name):
 
 
 def test_aligned(model: cv.face_BasicFaceRecognizer):
-    mod, hei = train_recongizer(model, "../datasets/subjects_aligned.csv")
+    mod, hei = train_recongizer(model, "../dataset_info/subjects_aligned.csv")
     predict(model=mod, height=hei, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", probe_label=7,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", probe_label=0,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, face="../images/dataset/cropped/Rudi/9_cropped_aligned.jpeg", probe_label=5,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False, identification=False)
     # save_model(mod, hei)
 
     # mod2, hei2 = load_model(models_dir+"eigenfaces/model_0_200.xml")
@@ -156,13 +156,13 @@ def test_aligned(model: cv.face_BasicFaceRecognizer):
 
 
 def test_cropped(model: cv.face_BasicFaceRecognizer):
-    mod, hei = train_recongizer(model, "../datasets/subjects.csv", resize=True)
+    mod, hei = train_recongizer(model, "../dataset_info/subjects.csv", resize=True)
     predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s1/27.jpg", probe_label=1,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s2/10.jpg", probe_label=2,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s8/22.jpg", probe_label=8,
-            show_mean=True, show_faces=True)
+            show_mean=False, show_faces=False, identification=False)
     # save_model(mod, hei)
 
 
@@ -177,6 +177,9 @@ if __name__ == '__main__':
 
     # TODO check params
     if args.recognizer == 0:
+        # model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create(num_components=30000)
+        # model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create(threshold=2350.0)
+        # model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create(threshold=100.0, num_components=10)
         model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
 
     elif args.recognizer == 1:
