@@ -11,19 +11,21 @@ dataset_images_dir = '../images/dataset/cropped'
 dataset_info_dir = '../dataset_info/'
 
 
-def show_image(im):
-    # cv.namedWindow('win', cv.WINDOW_NORMAL)
-    # # cv.resizeWindow('win', 1980, 1800)
+def show_image(im, matplot=True):
+    if matplot:
+        # show image using matplotlib
+        plt.figure()
+        plt.imshow(cv.cvtColor(im, cv.COLOR_BGR2RGB))
+        plt.show()
 
-    # cv.imshow('win', im)
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
+    else:
+        # show image using opencv
+        cv.namedWindow('win', cv.WINDOW_NORMAL)
+        # cv.resizeWindow('win', 1980, 1800)
 
-    # show image using matplotlib instead of opencv
-    #
-    plt.figure()
-    plt.imshow(cv.cvtColor(im, cv.COLOR_BGR2RGB))
-    plt.show()
+        cv.imshow('win', im)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
 
 
 def show_images(images):
