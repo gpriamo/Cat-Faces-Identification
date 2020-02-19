@@ -30,6 +30,7 @@ def evaluate_performances(model, thresholds, resize=False):
     model, height = rec.train_recongizer(model, train_csv, resize)
 
     distance_matrix = create_distance_matrix(test_csv, resize, model=model, height=height)
+    # TODO for each threshold t: compute FAR(t), FRR(t), DIR(t, k), ...
 
 
 if __name__ == '__main__':
