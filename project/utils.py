@@ -203,7 +203,7 @@ def get_label(file):
     return int(file.split("/")[-2].replace('s', ''))
 
 
-def parse_identification_result(result):
+def parse_identification_results(result):
     # ret = dict()
     #
     # for k in result:

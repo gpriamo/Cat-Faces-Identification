@@ -63,8 +63,7 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
         # print(coll.getMinDist())
         # print(coll.getMinLabel())
 
-        results = parse_identification_result(coll.getResults())
-        # print(results)
+        results = parse_identification_results(coll.getResults())
 
         if probe_label is not None:
             print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
@@ -168,7 +167,7 @@ def test_aligned(model: cv.face_BasicFaceRecognizer):
 def test_cropped(model: cv.face_BasicFaceRecognizer):
     mod, hei = train_recongizer(model, "../dataset_info/subjects.csv", resize=True)
     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1,
-            show_mean=False, show_faces=False, identification=False)
+            show_mean=False, show_faces=False, identification=True)
     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2,
             show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8,
