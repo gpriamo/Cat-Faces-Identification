@@ -40,7 +40,8 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Fa
     return model, height
 
 
-def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label=None, resize=False, identification=True,
+def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label=None, resize=False,
+            identification=True,
             save_dir=None,
             show_mean=False,
             save_mean=False,
@@ -62,7 +63,16 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
         # print(coll.getMinDist())
         # print(coll.getMinLabel())
 
-        return coll.getResults()
+        results = parse_identification_result(coll.getResults())
+        # print(results)
+
+        if probe_label is not None:
+            print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
+                  .format(coll.getMinLabel(), get_subject_name(coll.getMinLabel()), coll.getMinDist(),
+                          probe_label, get_subject_name(probe_label),
+                          "Success!" if coll.getMinLabel() == probe_label else "Failure!"))
+
+        return results
 
     prediction = model.predict(input_face)
 
