@@ -40,17 +40,17 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Fa
     return model, height
 
 
-def predict(model: cv.face_BasicFaceRecognizer, height, face, probe_label=None, resize=False, identification=True,
+def predict(model: cv.face_BasicFaceRecognizer, height, proble_image, probe_label=None, resize=False, identification=True,
             save_dir=None,
             show_mean=False,
             save_mean=False,
             show_faces=False,
             save_faces=False
             ):
-    if not path.exists(face):
-        raise RuntimeError("File {} does not exist!".format(face))
+    if not path.exists(proble_image):
+        raise RuntimeError("File {} does not exist!".format(proble_image))
 
-    input_face = cv.imread(face, 0)
+    input_face = cv.imread(proble_image, 0)
 
     if resize:
         input_face = resize_image(input_face, 100, 100)
@@ -140,11 +140,11 @@ def load_model(model: cv.face_BasicFaceRecognizer, file_name):
 
 def test_aligned(model: cv.face_BasicFaceRecognizer):
     mod, hei = train_recongizer(model, "../dataset_info/subjects_aligned.csv")
-    predict(model=mod, height=hei, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", probe_label=7,
+    predict(model=mod, height=hei, proble_image="../images/dataset/cropped/t/27_cropped_aligned.jpg", probe_label=7,
             show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", probe_label=0,
+    predict(model=mod, height=hei, proble_image="../images/dataset/cropped/c/9_cropped_aligned.jpeg", probe_label=0,
             show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, face="../images/dataset/cropped/Rudi/9_cropped_aligned.jpeg", probe_label=5,
+    predict(model=mod, height=hei, proble_image="../images/dataset/cropped/Rudi/9_cropped_aligned.jpeg", probe_label=5,
             show_mean=False, show_faces=False, identification=False)
     # save_model(mod, hei)
 
@@ -157,11 +157,11 @@ def test_aligned(model: cv.face_BasicFaceRecognizer):
 
 def test_cropped(model: cv.face_BasicFaceRecognizer):
     mod, hei = train_recongizer(model, "../dataset_info/subjects.csv", resize=True)
-    predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s1/27.jpg", probe_label=1,
+    predict(model=mod, height=hei, resize=True, proble_image="../images/dataset/cropped/s1/27.jpg", probe_label=1,
             show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s2/10.jpg", probe_label=2,
+    predict(model=mod, height=hei, resize=True, proble_image="../images/dataset/cropped/s2/10.jpg", probe_label=2,
             show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, resize=True, face="../images/dataset/cropped/s8/22.jpg", probe_label=8,
+    predict(model=mod, height=hei, resize=True, proble_image="../images/dataset/cropped/s8/22.jpg", probe_label=8,
             show_mean=False, show_faces=False, identification=False)
     # save_model(mod, hei)
 
