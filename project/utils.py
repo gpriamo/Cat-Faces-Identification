@@ -199,5 +199,24 @@ def get_subject_name(label):
         return "Impostor"
 
 
+def get_label(file):
+    return int(file.split("/")[-2].replace('s', ''))
+
+
+def parse_identification_result(result):
+    # ret = dict()
+    #
+    # for k in result:
+    #     label = k[0]
+    #     distance = k[1]
+    #
+    #     if label not in ret.keys():
+    #         ret[label] = distance
+    #     else:
+    #         ret[label] = min(distance, ret[label])
+
+    return sorted(list(dict(sorted(result, key=lambda x: int(x[1]), reverse=True)).items()), key=lambda x: int(x[1]))
+
+
 if __name__ == '__main__':
     create_csv(dataset_images_dir, dataset_info_dir)
