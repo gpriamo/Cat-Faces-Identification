@@ -138,9 +138,10 @@ def load_matrix(file):
 
 def evaluate_avg_performances(recognizer, thresholds, files):
     avg_performances_per_threshold = dict()
+
     for threshold in test_thresholds:
         avg_performances_per_threshold[threshold] = dict([("AVG_FRR", 0), ("AVG_FAR", 0), ("AVG_GRR", 0),
-                                                          ("DIR", dict())])
+                                                          ("AVG_DIR", dict())])
 
     for train, test in files:
         # Returns a dictionary "Threshold: rates for the threshold" based on the 'train' & 'test' files
@@ -152,14 +153,19 @@ def evaluate_avg_performances(recognizer, thresholds, files):
             avg_performances_per_threshold[threshold]["AVG_FAR"] += perf[threshold]["FAR"]
             avg_performances_per_threshold[threshold]["AVG_GRR"] += perf[threshold]["GRR"]
 
-            # TODO COMPUTE AVG FOR DIR
+            for k in perf[threshold]["DIR"]:
+                if k not in avg_performances_per_threshold[threshold]["AVG_DIR"].keys():
+                    avg_performances_per_threshold[threshold]["AVG_DIR"][k] = perf[threshold]["DIR"][k]
+                else:
+                    avg_performances_per_threshold[threshold]["AVG_DIR"][k] += perf[threshold]["DIR"][k]
 
     for threshold in test_thresholds:
         avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(k_fold_files)
         avg_performances_per_threshold[threshold]["AVG_FAR"] /= len(k_fold_files)
         avg_performances_per_threshold[threshold]["AVG_GRR"] /= len(k_fold_files)
 
-        # TODO COMPUTE AVG FOR DIR
+        for k in avg_performances_per_threshold[threshold]["AVG_DIR"].keys():
+            avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(k_fold_files)
 
     return avg_performances_per_threshold
 
