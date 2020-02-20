@@ -63,7 +63,11 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
         # print(coll.getMinDist())
         # print(coll.getMinLabel())
 
-        results = parse_identification_results(coll.getResults())
+        # results = parse_identification_results(coll.getResults())
+
+        results = sorted(coll.getResults(), key=lambda x: x[1])
+
+        # print(results)
 
         if probe_label is not None:
             print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
