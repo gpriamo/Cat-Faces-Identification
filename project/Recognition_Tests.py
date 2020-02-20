@@ -28,7 +28,8 @@ def create_distance_matrix(test_csv, resize, model, height):
 
 def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     """
-    Compute FAR, FRR, GRR and DIR(k) for each threshold passed in input.
+    Compute FAR, FRR, GRR and DIR(k) for each threshold passed in input
+    based on the couple of training and testing files provided.
 
     :param model: model to be used
     :param thresholds: thresholds to test
@@ -135,19 +136,38 @@ def load_matrix(file):
         return json.loads(fi.read())
 
 
+def evaluate_avg_performances(recognizer, thresholds, files):
+    avg_performances_per_threshold = dict()
+    for threshold in test_thresholds:
+        avg_performances_per_threshold[threshold] = dict([("AVG_FRR", 0), ("AVG_FAR", 0), ("AVG_GRR", 0),
+                                                          ("DIR", dict())])
+
+    for train, test in files:
+        # Returns a dictionary "Threshold: rates for the threshold" based on the 'train' & 'test' files
+        perf = evaluate_performances(model=recognizer, thresholds=thresholds, resize=True,
+                                     train_csv=train, test_csv=test)
+
+        for threshold in test_thresholds:
+            avg_performances_per_threshold[threshold]["AVG_FRR"] += perf[threshold]["FRR"]
+            avg_performances_per_threshold[threshold]["AVG_FAR"] += perf[threshold]["FAR"]
+            avg_performances_per_threshold[threshold]["AVG_GRR"] += perf[threshold]["GRR"]
+
+            # TODO COMPUTE AVG FOR DIR
+
+    for threshold in test_thresholds:
+        avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(k_fold_files)
+        avg_performances_per_threshold[threshold]["AVG_FAR"] /= len(k_fold_files)
+        avg_performances_per_threshold[threshold]["AVG_GRR"] /= len(k_fold_files)
+
+        # TODO COMPUTE AVG FOR DIR
+
+    return avg_performances_per_threshold
+
+
 if __name__ == '__main__':
-    recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
+    face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
     test_thresholds = [1.0, 2.0]
 
     k_fold_files = k_fold_cross_validation()
 
-    avg_far = 0
-    avg_frr = 0
-    avg_grr = 0
-    avg_dir_k = dict()
-
-    for train, test in k_fold_files:
-        perf = evaluate_performances(model=recognizer, thresholds=test_thresholds, resize=True,
-                                     train_csv=train, test_csv=test)
-
-        # TODO Compute averages for every iteration
+    avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
