@@ -27,6 +27,16 @@ def create_distance_matrix(test_csv, resize, model, height):
 
 
 def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
+    """
+    Compute FAR, FRR, GRR and DIR(k) for each threshold passed in input.
+
+    :param model: model to be used
+    :param thresholds: thresholds to test
+    :param train_csv: file containing the images to be used for training
+    :param test_csv: file containing the images to be used for testing
+    :param resize: flag to resize the images
+    :return: dictionary containing the computed rates
+    """
     model, height = rec.train_recongizer(model, train_csv, resize)
 
     distance_matrix = create_distance_matrix(test_csv, resize, model=model, height=height)
@@ -37,7 +47,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
         impostor_attempts = 0
 
         fa = 0  # False accepts counter
-        fr = 0  # False rejects counter
+        fr = 0  # False rejects counter -- Not used but still kept track of
         gr = 0  # Genuine rejects counter
         di = dict()  # Correct detect and identification @ rank k counter
         di[1] = 0
@@ -73,22 +83,26 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                     fr += 1
                 continue
 
+            # Find first index (rank) where a correct identification occurred
             for k in range(1, len(results)):
                 res = results[k]
                 res_label = res[0]
                 res_distance = res[1]
 
+                # Match found at rank k
                 if res_label == probe_label:
                     if res_distance <= t:
                         di[k] = di[k] + 1 if k in di.keys() else 1  # Correct detect & identify @ rank k
                     else:
                         fr += 1
+                        # Stop searching as distances have gone beyond the threshold
                         break
                 elif res_distance <= t:
                     fr += 1
                     continue
                 elif res_distance > t:  # Just "else" might be enough
                     fr += 1
+                    # Stop searching as distances have gone beyond the threshold
                     break
 
         # Compute rates
@@ -99,11 +113,11 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
         grr = gr / impostor_attempts
 
         higher_ranks = sorted(list(di.keys()))
-        higher_ranks.remove(1)
+        higher_ranks.remove(1)  # remove first rank, as here we're interested in the higher ones
         for k in higher_ranks:
             dir_k = (di[k] / genuine_attempts) + dir_k[k - 1]
 
-        performances[t] = dict([("frr", frr), ("far", far), ("grr", grr), ("dir", dir_k)])
+        performances[t] = dict([("FRR", frr), ("FAR", far), ("GRR", grr), ("DIR", dir_k)])
 
     return performances
 
