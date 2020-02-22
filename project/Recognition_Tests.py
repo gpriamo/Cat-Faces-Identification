@@ -5,7 +5,7 @@ import json
 import math
 
 
-def k_fold_cross_validation(dataset_path, k=10):
+def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
     """
     Placeholder method
     :return:
@@ -27,7 +27,7 @@ def k_fold_cross_validation(dataset_path, k=10):
             cont += 1
             new_list = []
             new_list.append(line)
-            if int(num_class) == 23:
+            if int(num_class) == tot_subjects:
                 dataset.append(new_list)
     # print(dataset)
     subjects.close()
