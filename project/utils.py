@@ -131,6 +131,9 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
         # {END} TOREMOVE
 
         for line in file.readlines():
+            if line == "\n":
+                break
+
             spl = line.split(";")
 
             im_file = spl[0]

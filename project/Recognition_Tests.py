@@ -88,17 +88,21 @@ def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
 
     ret = []
 
+    ''' Join all the sub-lists in the train element'''
     for f in final_list:
-        train = set()
-        test = set()
+        tr = set()
+        te = set()
 
         for ll in f[0]:
             for lll in ll:
-                train.add(lll)
+                if "\n" not in lll:
+                    tr.add(lll+"\n")
+                else:
+                    tr.add(lll)
         for cc in f[1]:
-            test.add(cc)
+            te.add(cc)
 
-        ret.append((train, test))
+        ret.append((tr, te))
 
         # print(len(train))
         # # print(train)
