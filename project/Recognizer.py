@@ -21,7 +21,7 @@ def norm_0_255(source: np.ndarray):
     return dst
 
 
-def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=False):
+def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=False, ret_labels=False):
     faces, labels = read_csv(csv_filename, resize)
 
     print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(labels)))
@@ -36,6 +36,9 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Fa
     model.train(faces, np.array(labels))
 
     print("Train finished")
+
+    if ret_labels:
+        return model, height, set(labels)
 
     return model, height
 
