@@ -1,3 +1,4 @@
+import os
 from project import Recognizer as rec
 from project import utils
 import cv2.cv2 as cv
@@ -327,24 +328,35 @@ if __name__ == '__main__':
 
     ''' Perform the k fold cross validation technique over the dataset'''
     dataset_file_path = '../dataset_info/subjects.csv'
-    k_fold = k_fold_cross_validation(dataset_file_path, k=3)
+    subsets = 3
+    k_fold = k_fold_cross_validation(dataset_file_path, k=subsets)
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
     test_files_folder = '../test/0/'
-    for i in range(len(k_fold)):
-        train, test = k_fold[i]
 
-        train_fn = test_files_folder + "{}_train.csv".format(i + 1)
-        with open(train_fn, 'w+') as fi:
-            fi.writelines(train)
+    if os.path.exists(test_files_folder):  # Reload the k fold files if they were generated previously
+        for file in os.listdir(test_files_folder):
+            for i in range(subsets):
+                train_fn = test_files_folder + "{}_train.csv".format(i + 1)
+                test_fn = test_files_folder + "{}_test.csv".format(i + 1)
 
-        test_fn = test_files_folder + "{}_test.csv".format(i + 1)
-        with open(test_fn, 'w+') as fi:
-            fi.write("../images/dataset/impostors/s99/cat2_cpy.jpg;99\n")  # TODO handle impostors in a better way
-            fi.writelines(test)
+                k_fold_files.append((train_fn, test_fn))
 
-        k_fold_files.append((train_fn, test_fn))
+    else:
+        for i in range(len(k_fold)):
+            train, test = k_fold[i]
+
+            train_fn = test_files_folder + "{}_train.csv".format(i + 1)
+            with open(train_fn, 'w+') as fi:
+                fi.writelines(train)
+
+            test_fn = test_files_folder + "{}_test.csv".format(i + 1)
+            with open(test_fn, 'w+') as fi:
+                fi.write("../images/dataset/impostors/s99/cat2_cpy.jpg;99\n")  # TODO handle impostors in a better way
+                fi.writelines(test)
+
+            k_fold_files.append((train_fn, test_fn))
 
     ''' Compute performances '''
     avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
