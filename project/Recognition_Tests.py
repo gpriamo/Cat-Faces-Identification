@@ -43,7 +43,7 @@ def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
     for cl in dataset:
         for subj in cl:
             d[classes] = len(cl)
-            classes += 1
+        classes += 1
     # print(d)
 
     ''' Split the dataset into k parts '''
@@ -86,7 +86,26 @@ def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
         couple = (train, test)
         final_list.append(couple)
 
-    return final_list
+    ret = []
+
+    for f in final_list:
+        train = set()
+        test = set()
+
+        for ll in f[0]:
+            for lll in ll:
+                train.add(lll)
+        for cc in f[1]:
+            test.add(cc)
+
+        ret.append((train, test))
+
+        # print(len(train))
+        # # print(train)
+        # print(len(test))
+        # # print(test)
+
+    return ret
 
 
 def create_distance_matrix(test_csv, resize, model, height):
@@ -270,6 +289,6 @@ if __name__ == '__main__':
     test_thresholds = [1.0, 2.0]
 
     dataset_path = '../dataset_info/subjects.csv'
-    k_fold_files = k_fold_cross_validation(dataset_path, k=10)
+    k_fold_files = k_fold_cross_validation(dataset_path, k=3)
 
-    avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
+    # avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
