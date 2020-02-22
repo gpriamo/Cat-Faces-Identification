@@ -63,7 +63,12 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
 
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    face = cat_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
+    face = cat_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors,
+                                        # minSize=(300, 300),
+                                        # maxSize=(400, 400)
+                                        )
+
+    print(len(face))
 
     if classifier == 0:
         col = (255, 0, 0)
@@ -74,6 +79,9 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
 
     cropped = None
 
+    if len(face) == 0:
+        print("No face found!")
+
     for (x, y, w, h) in face:  # blue
         img = cv.rectangle(img, (x, y), (x + w, y + h), col, 2)
         roi_gray = gray[y:y + h, x:x + w]
@@ -81,17 +89,18 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
         eyes = eye_cascade.detectMultiScale(roi_gray,
                                             scaleFactor=eyes_ScaleFactor,
                                             minNeighbors=eyes_minNeighbors,
-                                            minSize=eyes_minSize)
-
-        for (ex, ey, ew, eh) in eyes:
-            cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
+                                            minSize=eyes_minSize,
+                                            # maxSize=(100, 100)
+                                            )
 
         if len(eyes) == 0:
-            print("No eyes detected")
+            # print("No eyes detected")
+            # cropped = img_orig[y:y + h, x: x + w]
+            pass
         elif len(eyes) == 1:
             print("Only 1 eye (possibly) detected")
-            cropped = img_orig[y:y + h, x: x + w]
-
+            if cropped is None:
+                cropped = img_orig[y:y + h, x: x + w]
         elif len(eyes) == 2:
             print("2 eyes detected!")
             cropped = img_orig[y:y + h, x: x + w]
@@ -101,9 +110,29 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
             print("More than 2 eyes (?) detected")
             cropped = img_orig[y:y + h, x: x + w]
 
-    if show:
-        show_image(img)
+            print(eyes)
 
+            # eyes = np.delete(eyes, obj=0, axis=0)
+            # eyes = np.delete(eyes, obj=1, axis=0)
+            # eyes = np.delete(eyes, obj=1, axis=0)
+            # eyes = np.delete(eyes, obj=1, axis=0)
+            # print(eyes)
+
+            # print(sub_eyes)
+            #
+            # eyes = eyes[:-1].copy()
+            # eyes = eyes[:2].copy()
+            # print("---")
+            # print(eyes)
+            cropped = [img_orig[y:y + h, x: x + w], eyes]
+
+        for (ex, ey, ew, eh) in eyes:
+            cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
+
+        break
+
+    if show:
+        show_image(img, matplot=False)
     return cropped
 
 
@@ -173,60 +202,218 @@ def parse_args():
     return parser.parse_args()
 
 
+def crop_images():
+    """Image cropping & testing"""
+
+    out_dir = "../images/dataset/cropped/"
+
+    single = False
+
+    if single:
+        image = "../images/dataset/unprocessed/zelena/t16.jpg"
+        split = image.split("/")
+        dir_name = split[-2]
+        file_name = split[-1].split(".")[0]
+        file_extension = split[-1].split(".")[1]
+
+        save_dir = out_dir + dir_name + "/"
+        # save_dir = out_dir + dir_name + "/test/"
+
+        out = detect_cat_face(image, classifier=2, show=True, scaleFactor=1.05, minNeighbors=2,
+                              eyes_minSize=(200, 200),
+                              eyes_ScaleFactor=1.002
+                              )
+
+        if out is None:
+            exit()
+
+        if len(out) == 2:
+            face = out[0]
+            # show_image(img)
+
+            # transform image into a PIL Image (for face Alignment)
+            trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
+            im_pil = Image.fromarray(trans)
+
+            eye1 = out[1][0]
+            eye2 = out[1][1]
+            print("eye1 = {0} -- eye2 = {1}".format(eye1, eye2))
+
+            if np.less(eye1.item(0), eye2.item(0)):
+                left_eye = eye1
+                right_eye = eye2
+            else:
+                left_eye = eye2
+                right_eye = eye1
+
+            # left_eye = np.copy(np.minimum(eye1, eye2))
+            print("LE {}".format(left_eye))
+            # right_eye = eye2 if np.array_equal(left_eye, eye1) else eye1
+            print("RE {}".format(right_eye))
+
+            im = AlignFace(im_pil,
+                           eye_left=(int(left_eye[0]), int(left_eye[1])),
+                           eye_right=(int(right_eye[0]), int(right_eye[1])))
+
+            # im.show()
+            # show_image(face)
+
+            im_np = np.asarray(im_pil)
+
+            cv.imwrite(save_dir + file_name + "_cropped" + ".jpg", face)
+            im.save(save_dir + file_name + "_cropped_aligned." + file_extension)
+
+        else:
+            cv.imwrite(save_dir + file_name + "_cropped" + ".jpg", out)
+
+        exit()
+
+    imdir = "../images/dataset/unprocessed/elvis/"
+    cat_name = imdir.split("/")[-2]
+    print(cat_name)
+    images = [os.path.join(imdir, f) for f in os.listdir(imdir) if
+              os.path.isfile(os.path.join(imdir, f))]
+
+    skipped = 0
+    completed = 0
+
+    i = 1
+
+    for image in images:
+        spl = image.split("/")
+        dir_name = spl[-2]
+        file_name = spl[-1].split(".")[0]
+        file_extension = spl[-1].split(".")[1]
+
+        save_dir = out_dir + dir_name + "/"
+        # save_dir = out_dir + dir_name + "/test/"
+        fn = cat_name + str(i)
+        out_name = save_dir + fn + "_cropped" + ".jpg"
+        i += 1
+
+        # if out_name in skip:
+        #     continue
+
+        if os.path.exists(out_name):
+            print("Skipping {}".format(out_name))
+            skipped += 1
+            continue
+
+        print("Working on: {}".format(file_name))
+        print("Remaining: {}".format(len(images)-skipped-completed))
+
+        out = detect_cat_face(image, classifier=2, show=True, scaleFactor=1.02, minNeighbors=2,
+                              eyes_minSize=(50, 50),
+                              eyes_ScaleFactor=1.01
+                              # eyes_ScaleFactor=1.008
+                              # eyes_ScaleFactor=1.001
+                              )
+
+        if out is None:
+            exit()
+
+        if len(out) == 2:
+            face = out[0]
+            # show_image(img)
+
+            # transform image into a PIL Image (for face Alignment)
+            trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
+            im_pil = Image.fromarray(trans)
+
+            # if len(out[1] > 2):
+            #     cv.imwrite(out_name, face)
+            #     continue
+
+            eye1 = out[1][0]
+            eye2 = out[1][1]
+            # print("eye1 = {0} -- eye2 = {1}".format(eye1, eye2))
+
+            if np.less(eye1.item(0), eye2.item(0)):
+                left_eye = eye1
+                right_eye = eye2
+            else:
+                left_eye = eye2
+                right_eye = eye1
+
+            # left_eye = np.copy(np.minimum(eye1, eye2))
+            print("LE {}".format(left_eye))
+            # right_eye = eye2 if np.array_equal(left_eye, eye1) else eye1
+            print("RE {}".format(right_eye))
+
+            im = AlignFace(im_pil,
+                           eye_left=(int(left_eye[0]), int(left_eye[1])),
+                           eye_right=(int(right_eye[0]), int(right_eye[1])))
+            im.save(save_dir + fn + "_cropped_aligned." + file_extension)
+
+            # im.show()
+            # show_image(face)
+
+            im_np = np.asarray(im_pil)
+
+            cv.imwrite(out_name, face)
+
+        else:
+            cv.imwrite(out_name, out)
+
+        completed += 1
+
+
 if __name__ == '__main__':
     """Main for image cropping & testing purposes"""
-    args = parse_args()
+    crop_images()
 
-    out_dir = args.output
-    image = args.input_image
-
-    # TODO Remove
-    # split = image.split("/")
-    # dir_name = split[-2]
-    # file_name = split[-1].split(".")[0]
-    # file_extension = split[-1].split(".")[1]
+    # args = parse_args()
     #
-    # save_dir = out_dir + dir_name + "/"
-
-    dir, file = path.split(image)
-    dir_name = path.basename(dir)
-    file_name, file_extension = path.splitext(file)
-
-    save_dir = path.join(out_dir, dir_name)
-
-    detector = args.detector
-    sf = args.scalefactor
-    n = args.minneighbors
-    eyes_sf = args.eyes_scalefactor
-    eyes_n = args.eyes_minneighbors
-    eyes_ms = (args.eyes_minsize, args.eyes_minsize)
-
-    out = detect_cat_face(image, classifier=detector, show=True, scaleFactor=sf, minNeighbors=n,
-            eyes_ScaleFactor=eyes_sf, eyes_minNeighbors=eyes_n, eyes_minSize=eyes_ms)
-    if len(out) == 2:
-        face = out[0]
-        # show_image(img)
-
-        # transform image into a PIL Image (for face Alignment)
-        trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
-        im_pil = Image.fromarray(trans)
-
-        eye1 = out[1][0]
-        eye2 = out[1][1]
-        # print("eye1 = {0} -- eye2 = {1}".format(eye1, eye2))
-        left_eye = np.minimum(eye1, eye2)
-        right_eye = eye2 if np.array_equal(left_eye, eye1) else eye1
-        # print(left_eye)
-        # print(right_eye)
-
-        im = AlignFace(im_pil,
-                       eye_left=(int(left_eye[0]), int(left_eye[1])),
-                       eye_right=(int(right_eye[0]), int(right_eye[1])))
-
-        # im.show()
-        # show_image(face)
-
-        im_np = np.asarray(im_pil)
-
-        cv.imwrite(path.join(save_dir, file_name + "_cropped" + file_extension), face)
-        im.save(path.join(save_dir, file_name + "_cropped_aligned" + file_extension))
+    # out_dir = args.output
+    # image = args.input_image
+    #
+    # # TODO Remove
+    # # split = image.split("/")
+    # # dir_name = split[-2]
+    # # file_name = split[-1].split(".")[0]
+    # # file_extension = split[-1].split(".")[1]
+    # #
+    # # save_dir = out_dir + dir_name + "/"
+    #
+    # dir, file = path.split(image)
+    # dir_name = path.basename(dir)
+    # file_name, file_extension = path.splitext(file)
+    #
+    # save_dir = path.join(out_dir, dir_name)
+    #
+    # detector = args.detector
+    # sf = args.scalefactor
+    # n = args.minneighbors
+    # eyes_sf = args.eyes_scalefactor
+    # eyes_n = args.eyes_minneighbors
+    # eyes_ms = (args.eyes_minsize, args.eyes_minsize)
+    #
+    # out = detect_cat_face(image, classifier=detector, show=True, scaleFactor=sf, minNeighbors=n,
+    #         eyes_ScaleFactor=eyes_sf, eyes_minNeighbors=eyes_n, eyes_minSize=eyes_ms)
+    # if len(out) == 2:
+    #     face = out[0]
+    #     # show_image(img)
+    #
+    #     # transform image into a PIL Image (for face Alignment)
+    #     trans = cv.cvtColor(face, cv.COLOR_BGR2RGB)
+    #     im_pil = Image.fromarray(trans)
+    #
+    #     eye1 = out[1][0]
+    #     eye2 = out[1][1]
+    #     # print("eye1 = {0} -- eye2 = {1}".format(eye1, eye2))
+    #     left_eye = np.minimum(eye1, eye2)
+    #     right_eye = eye2 if np.array_equal(left_eye, eye1) else eye1
+    #     # print(left_eye)
+    #     # print(right_eye)
+    #
+    #     im = AlignFace(im_pil,
+    #                    eye_left=(int(left_eye[0]), int(left_eye[1])),
+    #                    eye_right=(int(right_eye[0]), int(right_eye[1])))
+    #
+    #     # im.show()
+    #     # show_image(face)
+    #
+    #     im_np = np.asarray(im_pil)
+    #
+    #     cv.imwrite(path.join(save_dir, file_name + "_cropped" + file_extension), face)
+    #     im.save(path.join(save_dir, file_name + "_cropped_aligned" + file_extension))

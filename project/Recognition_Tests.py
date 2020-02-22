@@ -131,8 +131,10 @@ def create_distance_matrix(test_csv, resize, model, height):
 
     label_to_file, files = utils.read_csv(test_csv, resize=resize, mapping=True)
 
+    train_labels = set()
     for file in files:
         label = utils.get_label(file)
+        train_labels.add(label)
 
         prediction = rec.predict(model=model, height=height, resize=resize,
                                  probe_label=label, probe_image=file, identification=True)
@@ -141,10 +143,10 @@ def create_distance_matrix(test_csv, resize, model, height):
 
         matrix_ser["{0}#{1}".format(file, label)] = prediction
 
-    print("Matrix computed. Trying to serialize...")
-    serialize_matrix(matrix_ser, '../test/0/matrix.json')
+    # print("Matrix computed. Trying to serialize...")
+    # serialize_matrix(matrix_ser, '../test/0/matrix.json')
 
-    return matrix
+    return matrix, train_labels
 
 
 def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
@@ -160,20 +162,24 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     :return: dictionary containing the computed rates
     """
 
-    print("Evaluating performances for files {} {}...".format(train_csv, test_csv))
+    print("Evaluating performances for files {} {}...\n".format(train_csv, test_csv))
 
     model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
-    print(gallery_labels)
+    # print(gallery_labels)
 
-    distance_matrix = create_distance_matrix(test_csv, resize, model=model, height=height)
+    distance_matrix, train_labels = create_distance_matrix(test_csv, resize, model=model, height=height)
 
-    print("Starting performances computation...")
+    print("\nStarting performances computation...")
 
     performances = dict()
-    for t in thresholds:
-        genuine_attempts = 0
-        impostor_attempts = 1  # TODO Need to check this out
 
+    genuine_attempts = len(gallery_labels)
+    impostors_labels = train_labels.difference(gallery_labels)
+    impostor_attempts = len(impostors_labels)
+
+    # print(impostor_attempts, impostors_labels)
+
+    for t in thresholds:
         fa = 0  # False accepts counter
         fr = 0  # False rejects counter -- Not used but still kept track of
         gr = 0  # Genuine rejects counter
@@ -190,7 +196,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
 
             # Impostor attempt
             if fr_label not in gallery_labels:
-                impostor_attempts += 1
+                # impostor_attempts += 1
 
                 if fr_distance <= t:
                     fa += 1
@@ -198,7 +204,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                     gr += 1
                 continue
 
-            genuine_attempts += 1
+            # genuine_attempts += 1
 
             # Check if a correct identification @ rank 1 happened
             if first_result[0] == probe_label:
@@ -245,21 +251,20 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
 
         performances[t] = dict([("FRR", frr), ("FAR", far), ("GRR", grr), ("DIR", dir_k)])
 
-        print("Done")
-        print(performances)
+    print(performances)
+    print("Done\n--\n")
 
     return performances
 
 
 def serialize_matrix(matrix, out_file):
-    # TODO test
     with open(out_file, "w+") as fi:
         ob = json.dumps(matrix)
         fi.write(ob)
 
 
 def load_matrix(file):
-    # TODO test
+    # TODO read & reformat matrix according to the real one
     with open(file, "r+") as fi:
         return json.loads(fi.read())
 
@@ -308,17 +313,21 @@ def evaluate_avg_performances(recognizer, thresholds, files):
         for k in avg_performances_per_threshold[threshold]["AVG_DIR"].keys():
             avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(k_fold_files)
 
+    print("Averages:\n\t")
+    print(avg_per_threshold)
     print("End")
 
     return avg_performances_per_threshold
 
 
 if __name__ == '__main__':
+    ''' Initialize recognizer and thresholds to be tested '''
     face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
     test_thresholds = [1.0, 2.0]
 
-    dataset_path = '../dataset_info/subjects.csv'
-    k_fold = k_fold_cross_validation(dataset_path, k=3)
+    ''' Perform the k fold cross validation technique over the dataset'''
+    dataset_file_path = '../dataset_info/subjects.csv'
+    k_fold = k_fold_cross_validation(dataset_file_path, k=3)
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
@@ -332,11 +341,10 @@ if __name__ == '__main__':
 
         test_fn = test_files_folder + "{}_test.csv".format(i + 1)
         with open(test_fn, 'w+') as fi:
-            fi.write("../images/dataset/impostors/s99/cat2_cpy.jpg;99\n")
+            fi.write("../images/dataset/impostors/s99/cat2_cpy.jpg;99\n")  # TODO handle impostors in a better way
             fi.writelines(test)
 
         k_fold_files.append((train_fn, test_fn))
 
+    ''' Compute performances '''
     avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
-
-    print(avg_per_threshold)
