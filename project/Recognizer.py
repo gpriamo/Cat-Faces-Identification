@@ -1,7 +1,5 @@
 from argparse import ArgumentParser
-import cv2.cv2 as cv
 import numpy as np
-from os import path
 
 from utils import *
 
