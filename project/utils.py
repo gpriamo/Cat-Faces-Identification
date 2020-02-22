@@ -113,8 +113,10 @@ def create_csv(base_path, output_dir):
 
     with open(path.join(output_dir, "subjects.csv"), "w+") as fl:
         fl.write(str.join("\n", lines))
+        fl.write("\n")
     with open(path.join(output_dir, "subjects_aligned.csv"), "w+") as fl:
         fl.write(str.join("\n", lines_aligned))
+        fl.write("\n")
 
 
 def read_csv(filename, resize=False, rgb=False, mapping=False):
