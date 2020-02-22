@@ -27,7 +27,7 @@ def k_fold_cross_validation(dataset_path, k=10):
             cont += 1
             new_list = []
             new_list.append(line)
-            if (int(num_class) == 23):
+            if int(num_class) == 23:
                 dataset.append(new_list)
     # print(dataset)
     subjects.close()
@@ -61,7 +61,7 @@ def k_fold_cross_validation(dataset_path, k=10):
             c += 1
             n_elem = 0
             cont_elem_subj = i * subj_list[c]
-            while (n_elem < subj_list[c]):
+            while n_elem < subj_list[c]:
                 n_list.append(sub[cont_elem_subj])
                 n_elem += 1
                 cont_elem_subj += 1
