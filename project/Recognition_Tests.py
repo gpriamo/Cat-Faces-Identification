@@ -7,7 +7,12 @@ import math
 
 def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
     """
-    Placeholder method
+    Generates all possible combinations of k subsets
+    from the original dataset.
+
+    :param dataset_path: path to the dataset file
+    :param k: the number of subsets to generate
+    :param tot_subjects: the total number of subjects inside the dataset
     :return:
     """
     subjects = open(dataset_path, 'r')
@@ -85,6 +90,16 @@ def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
 
 
 def create_distance_matrix(test_csv, resize, model, height):
+    """
+    Creates an all-against-all (probes vs  gallery)
+    distance matrix for identification.
+
+    :param test_csv: file containing the probe images paths
+    :param resize: flag to resize the probe images or not
+    :param model: recongizer to be used
+    :param height: height of each photo
+    :return: generated distance matrix
+    """
     matrix = dict()
 
     label_to_file, files = utils.read_csv(test_csv, resize=resize, mapping=True)
@@ -208,6 +223,15 @@ def load_matrix(file):
 
 
 def evaluate_avg_performances(recognizer, thresholds, files):
+    """
+    Computes averages of what is generated
+    by the evaluate_performances() function.
+
+    :param recognizer: model to be used
+    :param thresholds: chosen thresholds
+    :param files: iterable containing couples of training and testing files
+    :return: dictionary with average rates
+    """
     avg_performances_per_threshold = dict()
 
     for threshold in test_thresholds:
