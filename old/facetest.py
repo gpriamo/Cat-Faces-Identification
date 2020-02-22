@@ -7,7 +7,7 @@ import os
 
 models_dir = '../models/detection/'
 # try: SF= 1.1 - N = 5
-SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
+SF = 1.02  # 1.015  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
 N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
 
 
@@ -63,25 +63,28 @@ def cat_face_detect(file, det=0):
     print(cat_cascade_ext.empty())
     print(cat_cascade_lbp.empty())
 
-    print("Normal Haar:")
-    t0 = cv.getTickCount()
-    cats = cat_cascade.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
-    t1 = cv.getTickCount()
-    compute_elapsed_time(t0, t1)
-    time.sleep(2)
+    if det == 0:
+        print("Normal Haar:")
+        t0 = cv.getTickCount()
+        cats = cat_cascade.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+        t1 = cv.getTickCount()
+        compute_elapsed_time(t0, t1)
+        time.sleep(2)
 
-    print("Extended Haar:")
-    t0 = cv.getTickCount()
-    cats_ext = cat_cascade_ext.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
-    t1 = cv.getTickCount()
-    compute_elapsed_time(t0, t1)
-    time.sleep(2)
+    elif det == 1:
+        print("Extended Haar:")
+        t0 = cv.getTickCount()
+        cats_ext = cat_cascade_ext.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+        t1 = cv.getTickCount()
+        compute_elapsed_time(t0, t1)
+        time.sleep(2)
 
-    print("LBP:")
-    t0 = cv.getTickCount()
-    cats_lbp = cat_cascade_lbp.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
-    t1 = cv.getTickCount()
-    compute_elapsed_time(t0, t1)
+    elif det == 2:
+        print("LBP:")
+        t0 = cv.getTickCount()
+        cats_lbp = cat_cascade_lbp.detectMultiScale(gray, scaleFactor=SF, minNeighbors=N)
+        t1 = cv.getTickCount()
+        compute_elapsed_time(t0, t1)
 
     if det == 0:
         for (x, y, w, h) in cats:  # blue = haar
@@ -106,7 +109,7 @@ def cat_face_detect(file, det=0):
             for (ex, ey, ew, eh) in eyes:
                 cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 255, 0), 2)
 
-    else:
+    elif det == 2:
         for (x, y, w, h) in cats_lbp:  # red = LBP
             img = cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
             roi_gray = gray[y:y + h, x:x + w]
@@ -173,6 +176,7 @@ def face_detect():
 
 if __name__ == '__main__':
     imdir = '../images/random/'
+    imdir = '../images/dataset/unprocessed/c/'
 
     images = [os.path.join(imdir, f) for f in os.listdir(imdir) if
               os.path.isfile(os.path.join(imdir, f))]
@@ -180,4 +184,10 @@ if __name__ == '__main__':
     print(images)
 
     for im in images:
+        if im.split('/')[-1][0:-5] not in ['c10']:
+            continue
+        print("Working on " + str(im.split('/')[-1][0:-4]))
+        print(im)
         cat_face_detect(im, 0)
+        cat_face_detect(im, 1)
+        cat_face_detect(im, 2)
