@@ -295,4 +295,20 @@ if __name__ == '__main__':
     dataset_path = '../dataset_info/subjects.csv'
     k_fold_files = k_fold_cross_validation(dataset_path, k=3)
 
+    k_files = []
+
+    test_files_folder = '../test/0/'
+    for i in range(len(k_fold_files)):
+        train, test = k_fold_files[i]
+
+        train_fn = test_files_folder+"{}_train.csv".format(i+1)
+        with open(train_fn, 'w+') as fi:
+            fi.writelines(train)
+
+        test_fn = test_files_folder+"{}_test.csv".format(i+1)
+        with open(test_fn, 'w+') as fi:
+            fi.writelines(test)
+
+        k_files.append((train_fn, test_fn))
+
     # avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
