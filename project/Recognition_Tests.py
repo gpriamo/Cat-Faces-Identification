@@ -96,7 +96,7 @@ def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
         for ll in f[0]:
             for lll in ll:
                 if "\n" not in lll:
-                    tr.add(lll+"\n")
+                    tr.add(lll + "\n")
                 else:
                     tr.add(lll)
         for cc in f[1]:
@@ -123,14 +123,26 @@ def create_distance_matrix(test_csv, resize, model, height):
     :param height: height of each photo
     :return: generated distance matrix
     """
+
+    print("Creating distance matrix...")
+
     matrix = dict()
+    matrix_ser = dict()  # matrix to be serialized
 
     label_to_file, files = utils.read_csv(test_csv, resize=resize, mapping=True)
 
     for file in files:
         label = utils.get_label(file)
-        matrix[(file, label)] = rec.predict(model=model, height=height, resize=resize,
-                                            probe_label=label, probe_image=file, identification=True)
+
+        prediction = rec.predict(model=model, height=height, resize=resize,
+                                 probe_label=label, probe_image=file, identification=True)
+
+        matrix[(file, label)] = prediction
+
+        matrix_ser["{0}#{1}".format(file, label)] = prediction
+
+    print("Matrix computed. Trying to serialize...")
+    serialize_matrix(matrix_ser, '../test/0/matrix.json')
 
     return matrix
 
@@ -147,14 +159,20 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     :param resize: flag to resize the images
     :return: dictionary containing the computed rates
     """
-    model, height = rec.train_recongizer(model, train_csv, resize)
+
+    print("Evaluating performances for files {} {}...".format(train_csv, test_csv))
+
+    model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
+    print(gallery_labels)
 
     distance_matrix = create_distance_matrix(test_csv, resize, model=model, height=height)
+
+    print("Starting performances computation...")
 
     performances = dict()
     for t in thresholds:
         genuine_attempts = 0
-        impostor_attempts = 0
+        impostor_attempts = 1  # TODO Need to check this out
 
         fa = 0  # False accepts counter
         fr = 0  # False rejects counter -- Not used but still kept track of
@@ -165,8 +183,6 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
             probe_label = probe[1]
 
             results = distance_matrix[probe]
-
-            gallery_labels = {x[0] for x in results}
 
             first_result = results[0]
             fr_label = first_result[0]
@@ -229,6 +245,9 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
 
         performances[t] = dict([("FRR", frr), ("FAR", far), ("GRR", grr), ("DIR", dir_k)])
 
+        print("Done")
+        print(performances)
+
     return performances
 
 
@@ -255,16 +274,18 @@ def evaluate_avg_performances(recognizer, thresholds, files):
     :param files: iterable containing couples of training and testing files
     :return: dictionary with average rates
     """
+    print("Starting to compute performances...")
+
     avg_performances_per_threshold = dict()
 
     for threshold in test_thresholds:
         avg_performances_per_threshold[threshold] = dict([("AVG_FRR", 0), ("AVG_FAR", 0), ("AVG_GRR", 0),
                                                           ("AVG_DIR", dict())])
 
-    for train, test in files:
+    for train_f, test_f in files:
         # Returns a dictionary "Threshold: rates for the threshold" based on the 'train' & 'test' files
         perf = evaluate_performances(model=recognizer, thresholds=thresholds, resize=True,
-                                     train_csv=train, test_csv=test)
+                                     train_csv=train_f, test_csv=test_f)
 
         for threshold in test_thresholds:
             avg_performances_per_threshold[threshold]["AVG_FRR"] += perf[threshold]["FRR"]
@@ -277,6 +298,8 @@ def evaluate_avg_performances(recognizer, thresholds, files):
                 else:
                     avg_performances_per_threshold[threshold]["AVG_DIR"][k] += perf[threshold]["DIR"][k]
 
+    print("Finishing averages computation...")
+
     for threshold in test_thresholds:
         avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(k_fold_files)
         avg_performances_per_threshold[threshold]["AVG_FAR"] /= len(k_fold_files)
@@ -284,6 +307,8 @@ def evaluate_avg_performances(recognizer, thresholds, files):
 
         for k in avg_performances_per_threshold[threshold]["AVG_DIR"].keys():
             avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(k_fold_files)
+
+    print("End")
 
     return avg_performances_per_threshold
 
@@ -301,14 +326,17 @@ if __name__ == '__main__':
     for i in range(len(k_fold)):
         train, test = k_fold[i]
 
-        train_fn = test_files_folder+"{}_train.csv".format(i+1)
+        train_fn = test_files_folder + "{}_train.csv".format(i + 1)
         with open(train_fn, 'w+') as fi:
             fi.writelines(train)
 
-        test_fn = test_files_folder+"{}_test.csv".format(i+1)
+        test_fn = test_files_folder + "{}_test.csv".format(i + 1)
         with open(test_fn, 'w+') as fi:
+            fi.write("../images/dataset/impostors/s99/cat2_cpy.jpg;99\n")
             fi.writelines(test)
 
         k_fold_files.append((train_fn, test_fn))
 
-    # avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
+    avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
+
+    print(avg_per_threshold)
