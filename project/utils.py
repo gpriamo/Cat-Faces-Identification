@@ -143,7 +143,7 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
 
             # {BEGIN} TOREMOVE
             if label not in dic.keys():
-                dic[label] = 1
+                dic[label] = 0
             # elif dic[label] >= 10:
             #     continue
             dic[label] += 1
