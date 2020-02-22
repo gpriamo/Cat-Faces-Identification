@@ -24,7 +24,7 @@ def norm_0_255(source: np.ndarray):
 def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=False, ret_labels=False):
     faces, labels = read_csv(csv_filename, resize)
 
-    print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(labels)))
+    print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(set(labels))))
 
     height = faces[0].shape[0]
 
@@ -72,11 +72,11 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
 
         # print(results)
 
-        if probe_label is not None:
-            print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
-                  .format(coll.getMinLabel(), get_subject_name(coll.getMinLabel()), coll.getMinDist(),
-                          probe_label, get_subject_name(probe_label),
-                          "Success!" if coll.getMinLabel() == probe_label else "Failure!"))
+        # if probe_label is not None:
+        #     print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
+        #           .format(coll.getMinLabel(), get_subject_name(coll.getMinLabel()), coll.getMinDist(),
+        #                   probe_label, get_subject_name(probe_label),
+        #                   "Success!" if coll.getMinLabel() == probe_label else "Failure!"))
 
         return results
 
