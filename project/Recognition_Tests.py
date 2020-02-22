@@ -10,79 +10,79 @@ def k_fold_cross_validation(dataset_path, k=10):
     :return:
     """
     subjects = open(dataset_path, 'r')
-	dataset = []     #[[all images of subject 1][all images of subject 2]....]
-	new_list = []
+    dataset = []     #[[all images of subject 1][all images of subject 2]....]
+    new_list = []
 
-	cont = 1
-	''' Create a list of lists, which are the images of different subjects '''
-	for line in subjects:
-		image_and_class = line.split(';')
-		image_class = image_and_class[1]
-		num_class = image_class.split('\n')[0]
-		if int(num_class) == cont:
-			new_list.append(line)
-		else:
-			dataset.append(new_list) 
-			cont += 1
-			new_list = []
-			new_list.append(line)
-			if (int(num_class) == 23):
-				dataset.append(new_list)
+    cont = 1
+    ''' Create a list of lists, which are the images of different subjects '''
+    for line in subjects:
+        image_and_class = line.split(';')
+        image_class = image_and_class[1]
+	num_class = image_class.split('\n')[0]
+	if int(num_class) == cont:
+	    new_list.append(line)
+        else:
+	    dataset.append(new_list) 
+	    cont += 1
+	    new_list = []
+	    new_list.append(line)
+            if (int(num_class) == 23):
+	        dataset.append(new_list)
 	#print(dataset)
 
-	''' Create a dictionary of subject:number of images of the subject '''
-	d = dict()
-	classes = 1
-	for cl in dataset:
-		for subj in cl:
-			d[classes] = len(cl)
-		classes += 1
-	#print(d)
+    ''' Create a dictionary of subject:number of images of the subject '''
+    d = dict()
+    classes = 1
+    for cl in dataset:
+        for subj in cl:
+	    d[classes] = len(cl)
+	    classes += 1
+    #print(d)
 
 
-	''' Split the dataset into k parts '''
-	subj_list = []
+    ''' Split the dataset into k parts '''
+    subj_list = []
 
-	for c in d:
-		num_subj_for_subs = math.floor(d[c]/k)   # number of subject images in each subset
-		subj_list.append(num_subj_for_subs)
-	#print('-----------')
-	#print(subj_list)
+    for c in d:
+        num_subj_for_subs = math.floor(d[c]/k)   # number of subject images in each subset
+        subj_list.append(num_subj_for_subs)
+    #print('-----------')
+    #print(subj_list)
 
 
-	''' Creation of a list containing all the subsets with different images for the subjects '''
-	all_subsets = []
+    ''' Creation of a list containing all the subsets with different images for the subjects '''
+    all_subsets = []
+    n_list = []
+    c = -1
+    cont_elem_subj = 0
+
+    for i in range(k):
+        for sub in dataset:
+	    c += 1
+	    n_elem = 0
+	    cont_elem_subj = i * subj_list[c]
+	    while(n_elem < subj_list[c]):
+	        n_list.append(sub[cont_elem_subj])
+		n_elem += 1
+		cont_elem_subj += 1
+	all_subsets.append(n_list)
 	n_list = []
 	c = -1
-	cont_elem_subj = 0
 
-	for i in range(k):
-		for sub in dataset:
-			c += 1
-			n_elem = 0
-			cont_elem_subj = i * subj_list[c]
-			while(n_elem < subj_list[c]):
-				n_list.append(sub[cont_elem_subj])
-				n_elem += 1
-				cont_elem_subj += 1
-		all_subsets.append(n_list)
-		n_list = []
-		c = -1
-
-	#print(all_subsets)
-	#print('-------')
+    #print(all_subsets)
+    #print('-------')
 
 
-	''' Creation of (k-1)subsets for training and 1 for test '''
-	final_list = []
-	for i in range(k):
-		train = all_subsets.copy()
-		test = all_subsets[i]
-		del train[i]
-		couple = (train, test)
-		final_list.append(couple)
+    ''' Creation of (k-1)subsets for training and 1 for test '''
+    final_list = []
+    for i in range(k):
+        train = all_subsets.copy()
+	test = all_subsets[i]
+	del train[i]
+	couple = (train, test)
+	final_list.append(couple)
         
-	return final_list
+    return final_list
 
 
 def create_distance_matrix(test_csv, resize, model, height):
