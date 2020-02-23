@@ -8,6 +8,7 @@ import math
 
 impostors_csv = '../dataset_info/impostors.csv'
 
+
 def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
     """
     Generates all possible combinations of k subsets
