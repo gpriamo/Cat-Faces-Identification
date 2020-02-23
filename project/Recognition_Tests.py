@@ -6,6 +6,8 @@ import json
 import math
 
 
+impostors_csv = '../dataset_info/impostors.csv'
+
 def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
     """
     Generates all possible combinations of k subsets
@@ -321,6 +323,13 @@ def evaluate_avg_performances(recognizer, thresholds, files):
     return avg_performances_per_threshold
 
 
+def write_impostors(fd):
+    impostors_ltf, impostors_files = utils.read_csv(impostors_csv, mapping=True)
+
+    for imp_file in impostors_files:
+        fd.write(imp_file+";"+str(utils.get_label(imp_file))+"\n")
+
+
 if __name__ == '__main__':
     ''' Initialize recognizer and thresholds to be tested '''
     face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
@@ -354,7 +363,7 @@ if __name__ == '__main__':
 
             test_fn = test_files_folder + "{}_test.csv".format(i + 1)
             with open(test_fn, 'w+') as fi:
-                fi.write("../images/dataset/impostors/s99/cat2_cpy.jpg;99\n")  # TODO handle impostors in a better way
+                write_impostors(fi)  # Write the impostors files to the test csv
                 fi.writelines(test)
 
             k_fold_files.append((train_fn, test_fn))
