@@ -315,7 +315,7 @@ def evaluate_avg_performances(recognizer, thresholds, files):
             avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(k_fold_files)
 
     print("Averages:\n\t")
-    print(avg_per_threshold)
+    print(avg_performances_per_threshold)
     print("End")
 
     return avg_performances_per_threshold
@@ -333,15 +333,16 @@ if __name__ == '__main__':
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
-    test_files_folder = '../test/0/'
+    test_files_folder = '../test/0/csv/'
 
-    if os.path.exists(test_files_folder):  # Reload the k fold files if they were generated previously
-        for file in os.listdir(test_files_folder):
-            for i in range(subsets):
-                train_fn = test_files_folder + "{}_train.csv".format(i + 1)
-                test_fn = test_files_folder + "{}_test.csv".format(i + 1)
+    # Reload the k fold files if they were generated previously
+    if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
+        # for file in os.listdir(test_files_folder):
+        for i in range(subsets):
+            train_fn = test_files_folder + "{}_train.csv".format(i + 1)
+            test_fn = test_files_folder + "{}_test.csv".format(i + 1)
 
-                k_fold_files.append((train_fn, test_fn))
+            k_fold_files.append((train_fn, test_fn))
 
     else:
         for i in range(len(k_fold)):
