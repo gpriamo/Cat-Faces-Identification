@@ -8,6 +8,7 @@ from os import path
 subject_to_name_file = '../dataset_info/subject-to-name.txt'
 subject_to_name = None
 dataset_images_dir = '../images/dataset/cropped'
+impostors_images_dir = '../images/dataset/impostors'
 dataset_info_dir = '../dataset_info/'
 
 
@@ -79,7 +80,7 @@ def create_csv(base_path, output_dir):
     :param output_dir:
         directory where to save CSV files.
     """
-    label = 1
+    # label = 1
     separator = ";"
 
     print("Creating CSV file...")
@@ -90,6 +91,8 @@ def create_csv(base_path, output_dir):
     for dir_name, dir_names, file_names in os.walk(base_path):
         dir_names.sort(key=lambda l: int(l.replace('s', '')))
         for subdir_name in dir_names:
+
+            label = int(subdir_name.replace('s', ''))
 
             if subdir_name == "test":
                 continue
@@ -106,15 +109,24 @@ def create_csv(base_path, output_dir):
                     lines_aligned.append(s)
                 else:
                     lines.append(s)
-            label = label + 1
+            # label = label + 1
 
     lines_aligned.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split("_")[0])))
     lines.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split(".")[0])))
 
-    with open(path.join(output_dir, "subjects.csv"), "w+") as fl:
+    fname = "subjects.csv"
+    fname_al = "subjects_aligned.csv"
+
+    print(base_path)
+    if "impostors" in base_path:
+        print("here")
+        fname = "impostors.csv"
+        fname_al = "impostors_aligned.csv"
+
+    with open(path.join(output_dir, fname), "w+") as fl:
         fl.write(str.join("\n", lines))
         fl.write("\n")
-    with open(path.join(output_dir, "subjects_aligned.csv"), "w+") as fl:
+    with open(path.join(output_dir, fname_al), "w+") as fl:
         fl.write(str.join("\n", lines_aligned))
         fl.write("\n")
 
@@ -225,3 +237,4 @@ def parse_identification_results(result):
 
 if __name__ == '__main__':
     create_csv(dataset_images_dir, dataset_info_dir)
+    create_csv(impostors_images_dir, dataset_info_dir)
