@@ -199,8 +199,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
             fr_distance = first_result[1]
 
             # Impostor attempt
-            if fr_label not in gallery_labels:
-                # impostor_attempts += 1
+            # if fr_label not in gallery_labels:
+            if fr_label in impostors_labels:
 
                 if fr_distance <= t:
                     fa += 1
@@ -208,10 +208,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                     gr += 1
                 continue
 
-            # genuine_attempts += 1
-
             # Check if a correct identification @ rank 1 happened
-            if first_result[0] == probe_label:
+            if fr_label == probe_label:
                 # Check if distance is less than the threshold
                 if fr_distance <= t:
                     di[1] += 1
@@ -219,7 +217,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                     fr += 1
                 continue
 
-            # Find first index (rank) where a correct identification occurred
+            # Try to the first index (rank) where a correct identification occurred
             for k in range(1, len(results)):
                 res = results[k]
                 res_label = res[0]
@@ -235,7 +233,6 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                         break
                 elif res_distance <= t:
                     fr += 1
-                    continue
                 elif res_distance > t:  # Just "else" might be enough
                     fr += 1
                     # Stop searching as distances have gone beyond the threshold
@@ -310,12 +307,12 @@ def evaluate_avg_performances(recognizer, thresholds, files):
     print("Finishing averages computation...")
 
     for threshold in test_thresholds:
-        avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(k_fold_files)
-        avg_performances_per_threshold[threshold]["AVG_FAR"] /= len(k_fold_files)
-        avg_performances_per_threshold[threshold]["AVG_GRR"] /= len(k_fold_files)
+        avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(files)
+        avg_performances_per_threshold[threshold]["AVG_FAR"] /= len(files)
+        avg_performances_per_threshold[threshold]["AVG_GRR"] /= len(files)
 
         for k in avg_performances_per_threshold[threshold]["AVG_DIR"].keys():
-            avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(k_fold_files)
+            avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(files)
 
     print("Averages:\n\t")
     print(avg_performances_per_threshold)
