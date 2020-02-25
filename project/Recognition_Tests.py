@@ -336,7 +336,6 @@ if __name__ == '__main__':
     ''' Perform the k fold cross validation technique over the dataset'''
     dataset_file_path = '../dataset_info/subjects.csv'
     subsets = 3
-    k_fold = k_fold_cross_validation(dataset_file_path, k=subsets)
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
@@ -344,6 +343,7 @@ if __name__ == '__main__':
 
     # Reload the k fold files if they were generated previously
     if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
+        print("Loading pre-generated k fold files...")
         # for file in os.listdir(test_files_folder):
         for i in range(subsets):
             train_fn = test_files_folder + "{}_train.csv".format(i + 1)
@@ -352,6 +352,9 @@ if __name__ == '__main__':
             k_fold_files.append((train_fn, test_fn))
 
     else:
+        print("Generating k-fold files...")
+        k_fold = k_fold_cross_validation(dataset_file_path, k=subsets)
+
         for i in range(len(k_fold)):
             train, test = k_fold[i]
 
