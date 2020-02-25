@@ -116,11 +116,12 @@ def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
     return ret
 """
 
+
 def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
     """
     Generates all possible combinations of k subsets
     from the original dataset.
- 
+
     :param dataset_path: path to the dataset file
     :param k: the number of subsets to generate
     :param n_impostors: the number of impostors to use
@@ -128,53 +129,60 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
     """
     label_to_file, files = utils.read_csv(dataset_path, mapping=True)
     mn = min(len(x) for x in label_to_file.values())
- 
+
     pps = int(mn / k)
     st = 0
- 
+
     ls = list(label_to_file.values())
- 
+
     impostors = list(random.choices(list(label_to_file.keys()), k=k * n_impostors))
- 
     print(impostors)
- 
+
     for li in ls:
         # shuffle the lists in order to get different results for each run of the function
         random.shuffle(li)
- 
+
     subsets = []
     for i in range(k):
         s = set()
- 
+
         for subj_lst in ls:
             s.update(subj_lst[st:st + pps])
- 
+
         subsets.append(s)
- 
+
         st += pps
- 
+
     ret = []
     for i in range(k):
         # each time, the i-th element is the testing subset
         test = subsets[i]
- 
+
         # and use the rest as training subset
         training = set()
- 
+
         cpy = subsets[:]
         cpy.remove(test)
- 
+
         for c in cpy:
             training.update(c)
- 
+
         imps = impostors[i * n_impostors:(i + 1) * n_impostors]
         for imp in imps:
             for image in list(training)[:]:
                 if utils.get_label(image) == imp:
                     training.remove(image)
- 
-        ret.append((list(training), list(test)))
- 
+
+        # ret.append((list(training), list(test)))
+
+        training_ls = list(training)
+        testing_ls = list(test)
+
+        training_ls = [x+";"+str(utils.get_label(x)) for x in training_ls]
+        testing_ls = [x+";"+str(utils.get_label(x)) for x in testing_ls]
+
+        ret.append((training_ls, testing_ls))
+
     return ret
 
 
@@ -401,7 +409,7 @@ if __name__ == '__main__':
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
-    test_files_folder = '../dataset_info/k_fold/'
+    test_files_folder = '../test/1/csv/'
 
     # Reload the k fold files if they were generated previously
     if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
@@ -422,10 +430,13 @@ if __name__ == '__main__':
 
             train_fn = test_files_folder + "{}_train.csv".format(i + 1)
             with open(train_fn, 'w+') as fi:
+                # fi.writelines(train)
                 fi.writelines("\n".join(train))
 
             test_fn = test_files_folder + "{}_test.csv".format(i + 1)
             with open(test_fn, 'w+') as fi:
+                # write_impostors(fi)  # Write the impostors files to the test csv
+                # fi.writelines(test)
                 fi.writelines("\n".join(test))
 
             k_fold_files.append((train_fn, test_fn))
