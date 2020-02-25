@@ -135,10 +135,10 @@ def create_distance_matrix(test_csv, resize, model, height):
 
     label_to_file, files = utils.read_csv(test_csv, resize=resize, mapping=True)
 
-    train_labels = set()
+    probe_labels = set()
     for file in files:
         label = utils.get_label(file)
-        train_labels.add(label)
+        probe_labels.add(label)
 
         prediction = rec.predict(model=model, height=height, resize=resize,
                                  probe_label=label, probe_image=file, identification=True)
@@ -150,7 +150,7 @@ def create_distance_matrix(test_csv, resize, model, height):
     # print("Matrix computed. Trying to serialize...")
     # serialize_matrix(matrix_ser, '../test/0/matrix.json')
 
-    return matrix, train_labels
+    return matrix, probe_labels
 
 
 def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
@@ -171,14 +171,14 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
     # print(gallery_labels)
 
-    distance_matrix, train_labels = create_distance_matrix(test_csv, resize, model=model, height=height)
+    distance_matrix, probe_labels = create_distance_matrix(test_csv, resize, model=model, height=height)
 
     print("\nStarting performances computation...")
 
     performances = dict()
 
-    genuine_attempts = len(gallery_labels)
-    impostors_labels = train_labels.difference(gallery_labels)
+    genuine_attempts = len(probe_labels.intersection(gallery_labels))
+    impostors_labels = probe_labels.difference(gallery_labels)
     impostor_attempts = len(impostors_labels)
 
     # print(impostor_attempts, impostors_labels)
