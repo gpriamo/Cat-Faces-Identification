@@ -15,5 +15,30 @@ Biometric Systems Project 2020
 - [ ] Performance evaluation (all vs all matrix)
 1) K-Fold cross validation (see Lesson2-bis)
 2) All against all distance matrix for identification open set (see Lesson2-bis)
+
+
+3 datset
+	- Raw
+	- Best
+	- Best aligned
+
+Test per iperparametri
+	Scegliere J configurazioni* per ogni modello
+		performance evaluation per mostrare le differenze
+
+
+Eigenfaces:
+	DEFAULT, 80, 200 & similar
+
+Prendere la configurazione migliore per ognuno dei 3 modelli
+	plottare insieme le curve 
+
+
+Rate da plottare:
+	FRR
+	FAR
+	GRR
+	ROC
+	
 ### Phase 3 ### 
 - [ ] Report
