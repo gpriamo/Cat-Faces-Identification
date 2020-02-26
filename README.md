@@ -28,7 +28,12 @@ Test per iperparametri
 
 
 Eigenfaces:
-	DEFAULT, 80, 200 & similar
+	10, 80, (1000), DEFAULT
+Fisher:
+	10, 80, (1000), DEFAULT
+LBP:
+	for grid in [(8,8), (12,12)]:
+		radius, neighbors = DEFAULT (1,8) - (1,4) - (2,8)  - (2,12)  - (2,16)
 
 Prendere la configurazione migliore per ognuno dei 3 modelli
 	plottare insieme le curve 
