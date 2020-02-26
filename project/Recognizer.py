@@ -33,7 +33,7 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Fa
 
     model.train(faces, np.array(labels))
 
-    print("Train finished")
+    # print("Train finished")
 
     if ret_labels:
         return model, height, set(labels)
@@ -153,7 +153,7 @@ def load_model(model: cv.face_BasicFaceRecognizer, file_name):
 
 
 def test_aligned(model: cv.face_BasicFaceRecognizer):
-    mod, hei = train_recongizer(model, "../dataset_info/subjects_aligned.csv")
+    mod, hei = train_recongizer(model, "../dataset_info/bak/best/subjects_aligned.csv")
     predict(model=mod, height=hei, probe_image="../images/dataset/cropped/t/27_cropped_aligned.jpg", probe_label=7,
             show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, probe_image="../images/dataset/cropped/c/9_cropped_aligned.jpeg", probe_label=0,
@@ -170,9 +170,9 @@ def test_aligned(model: cv.face_BasicFaceRecognizer):
 
 
 def test_cropped(model: cv.face_BasicFaceRecognizer):
-    mod, hei = train_recongizer(model, "../dataset_info/subjects.csv", resize=True)
+    mod, hei = train_recongizer(model, "../dataset_info/bak/best/subjects.csv", resize=True)
     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1,
-            show_mean=False, show_faces=False, identification=True)
+            show_mean=False, show_faces=True, identification=False)
     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2,
             show_mean=False, show_faces=False, identification=False)
     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8,
@@ -188,6 +188,8 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
+
+    model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
 
     # TODO check params
     if args.recognizer == 0:
