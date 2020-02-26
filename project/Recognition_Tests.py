@@ -6,7 +6,7 @@ import json
 import random
 
 
-impostors_csv = '../dataset_info/impostors.csv'
+# impostors_csv = '../dataset_info/impostors.csv'
 
 """
 def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
@@ -136,7 +136,7 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
     ls = list(label_to_file.values())
 
     impostors = list(random.choices(list(label_to_file.keys()), k=k * n_impostors))
-    print(impostors)
+#    print(impostors)
 
     for li in ls:
         # shuffle the lists in order to get different results for each run of the function
@@ -201,7 +201,7 @@ def create_distance_matrix(test_csv, resize, model, height):
     print("Creating distance matrix...")
 
     matrix = dict()
-    matrix_ser = dict()  # matrix to be serialized
+    # matrix_ser = dict()  # matrix to be serialized
 
     label_to_file, files = utils.read_csv(test_csv, resize=resize, mapping=True)
 
@@ -215,10 +215,11 @@ def create_distance_matrix(test_csv, resize, model, height):
 
         matrix[(file, label)] = prediction
 
-        matrix_ser["{0}#{1}".format(file, label)] = prediction
+        # matrix_ser["{0}#{1}".format(file, label)] = prediction
 
     # print("Matrix computed. Trying to serialize...")
-    # serialize_matrix(matrix_ser, '../test/0/matrix.json')
+    # import datetime
+    # serialize_matrix(matrix_ser, '../test/1/matrix{}.json'.format(datetime.datetime.now()))
 
     return matrix, probe_labels
 
@@ -235,6 +236,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     :param resize: flag to resize the images
     :return: dictionary containing the computed rates
     """
+
+    dir1scores = []
 
     print("Evaluating performances for files {} {}...\n".format(train_csv, test_csv))
 
@@ -280,6 +283,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
 
             # Check if a correct identification @ rank 1 happened
             if fr_label == probe_label:
+                # dir1scores.append(fr_distance)
+
                 # Check if distance is less than the threshold
                 if fr_distance <= t:
                     di[1] += 1
@@ -308,6 +313,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                     # Stop searching as distances have gone beyond the threshold
                     break
 
+        # write_scores(dir1scores)
+
         # Compute rates
         dir_k = dict()  # Correct detect & identify rate @ rank k
         dir_k[1] = di[1] / genuine_attempts
@@ -318,7 +325,9 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
         higher_ranks = sorted(list(di.keys()))
         higher_ranks.remove(1)  # remove first rank, as here we're interested in the higher ones
         for k in higher_ranks:
-            dir_k = (di[k] / genuine_attempts) + dir_k[k - 1]
+            if k-1 not in dir_k.keys():  # TODO need to check this as I'm not entirely sure it is correct
+                dir_k[k - 1] = dir_k[max(dir_k.keys())]
+            dir_k[k] = (di[k] / genuine_attempts) + dir_k[k - 1]
 
         performances[t] = dict([("FRR", frr), ("FAR", far), ("GRR", grr), ("DIR", dir_k)])
 
@@ -391,17 +400,30 @@ def evaluate_avg_performances(recognizer, thresholds, files):
     return avg_performances_per_threshold
 
 
-def write_impostors(fd):
-    impostors_ltf, impostors_files = utils.read_csv(impostors_csv, mapping=True)
+# def write_scores(scores):
+#     avg = sum(scores) / len(scores)
+#     with open(test_files_folder+"dd.txt", 'a+') as fi:
+#         fi.write("AVG: " + str(avg) + "\n")
+#         fi.write(str(scores))
+#         fi.write("\n------\n\n")
 
-    for imp_file in impostors_files:
-        fd.write(imp_file+";"+str(utils.get_label(imp_file))+"\n")
+
+# def write_impostors(fd):
+#     impostors_ltf, impostors_files = utils.read_csv(impostors_csv, mapping=True)
+#
+#     for imp_file in impostors_files:
+#         fd.write(imp_file+";"+str(utils.get_label(imp_file))+"\n")
 
 
 if __name__ == '__main__':
     ''' Initialize recognizer and thresholds to be tested '''
     face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
-    test_thresholds = [1.0, 2.0]
+    # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.FisherFaceRecognizer_create()
+    # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.LBPHFaceRecognizer_create()
+    test_thresholds = None  # TODO SET ACCORDINGLY
+
+    # import sys
+    # test_thresholds = [sys.maxsize]
 
     ''' Perform the k fold cross validation technique over the dataset'''
     dataset_file_path = '../dataset_info/subjects.csv'
