@@ -8,6 +8,8 @@ from os import path
 subject_to_name_file = '../dataset_info/subject-to-name.txt'
 subject_to_name = None
 dataset_images_dir = '../images/dataset/cropped'
+# dataset_images_dir = '../images/dataset/best'
+# dataset_images_dir = '../images/dataset/best_aligned'
 impostors_images_dir = '../images/dataset/impostors'
 dataset_info_dir = '../dataset_info/'
 
@@ -118,10 +120,10 @@ def create_csv(base_path, output_dir):
     fname_al = "subjects_aligned.csv"
 
     print(base_path)
-    if "impostors" in base_path:
-        print("here")
-        fname = "impostors.csv"
-        fname_al = "impostors_aligned.csv"
+    # if "impostors" in base_path:
+    #     print("here")
+    #     fname = "impostors.csv"
+    #     fname_al = "impostors_aligned.csv"
 
     with open(path.join(output_dir, fname), "w+") as fl:
         fl.write(str.join("\n", lines))
@@ -237,4 +239,4 @@ def parse_identification_results(result):
 
 if __name__ == '__main__':
     create_csv(dataset_images_dir, dataset_info_dir)
-    create_csv(impostors_images_dir, dataset_info_dir)
+    # create_csv(impostors_images_dir, dataset_info_dir)
