@@ -44,7 +44,7 @@ def show_images(images):
     c, r = size
 
     for i, im in enumerate(images):
-        fig.add_subplot(r, c, i+1)
+        fig.add_subplot(r, c, i + 1)
         plt.imshow(cv.cvtColor(im, cv.COLOR_BGR2RGB))
 
     plt.show()
@@ -240,39 +240,51 @@ def parse_identification_results(result):
     return sorted(list(dict(sorted(result, key=lambda x: int(x[1]), reverse=True)).items()), key=lambda x: int(x[1]))
 
 
-def plot_performancies(avg_per_threshold):
-    thresholds = list()
-    fars = list()
-    frrs = list()
-    dirs = list()
-    for t, performs in avg_per_threshold.items():
-        thresholds.append(t)
-        fars.append(performs['AVG_FAR'])
-        frrs.append(performs['AVG_FRR'])
-        dirs.append(performs['AVG_DIR'][1])
-
-    err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
-
+def plot_error_rates(performancies, model_names):
     plt.figure()
-    plt.plot(thresholds, fars, label='FAR')
-    plt.plot(thresholds, frrs, label='FRR')
+
+    for avg_per_threshold, model_name in zip(performancies, model_names):
+        thresholds = list()
+        fars = list()
+        frrs = list()
+        for t, performs in avg_per_threshold.items():
+            thresholds.append(t)
+            fars.append(performs['AVG_FAR'])
+            frrs.append(performs['AVG_FRR'])
+
+        err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
+
+        plt.plot(thresholds, fars, label=model_name + ': FAR')
+        plt.plot(thresholds, frrs, label=model_name + ': FRR')
+
+        plt.scatter(err_t, err, color='gray')
+        plt.axvline(x=err_t, color='gray', linestyle='--')
+        plt.annotate('ERR', (err_t, err), xytext=(err_t + 50, err + .02))
+
     plt.xlabel('Tolerance Threshold')
     plt.ylabel('Error Rate')
-
-    plt.scatter(err_t, err, color='gray')
-    plt.axvline(x=err_t, color='gray', linestyle='--')
-    plt.annotate('ERR', (err_t, err))
-
     plt.grid()
     plt.legend()
     plt.show()
 
+
+def plot_rocs(performancies, model_names):
     plt.figure()
     plt.title('Watchlist ROC')
-    plt.plot(fars, dirs, linewidth=2)
+
+    for avg_per_threshold, model_name in zip(performancies, model_names):
+        fars = list()
+        dirs = list()
+        for performs in avg_per_threshold.values():
+            fars.append(performs['AVG_FAR'])
+            dirs.append(performs['AVG_DIR'][1])
+
+        plt.plot(fars, dirs, linewidth=2, label=model_name)
+
     plt.xlabel('False Alarm Rate')
     plt.ylabel('Detect and Identify Rate')
     plt.grid()
+    plt.legend()
     plt.show()
 
 

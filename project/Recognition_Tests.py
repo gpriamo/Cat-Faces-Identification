@@ -237,8 +237,6 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     :return: dictionary containing the computed rates
     """
 
-    dir1scores = []
-
     print("Evaluating performances for files {} {}...\n".format(train_csv, test_csv))
 
     model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
@@ -254,7 +252,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     impostors_labels = probe_labels.difference(gallery_labels)
     impostor_attempts = len(impostors_labels)
 
-    # print(impostor_attempts, impostors_labels)
+    print('Impostors: ', impostors_labels)
 
     for t in thresholds:
         fa = 0  # False accepts counter
@@ -274,7 +272,6 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
             # Impostor attempt
             # if fr_label not in gallery_labels:
             if fr_label in impostors_labels:
-
                 if fr_distance <= t:
                     fa += 1
                 else:
@@ -283,8 +280,6 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
 
             # Check if a correct identification @ rank 1 happened
             if fr_label == probe_label:
-                # dir1scores.append(fr_distance)
-
                 # Check if distance is less than the threshold
                 if fr_distance <= t:
                     di[1] += 1
@@ -293,7 +288,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                 continue
 
             # Try to the first index (rank) where a correct identification occurred
-            for k in range(1, len(results)):
+            for k in range(2, len(results)):
                 res = results[k]
                 res_label = res[0]
                 res_distance = res[1]
@@ -331,7 +326,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
 
         performances[t] = dict([("FRR", frr), ("FAR", far), ("GRR", grr), ("DIR", dir_k)])
 
-    print(performances)
+    # print(performances)
     print("Done\n--\n")
 
     return performances
@@ -393,9 +388,9 @@ def evaluate_avg_performances(recognizer, thresholds, files):
         for k in avg_performances_per_threshold[threshold]["AVG_DIR"].keys():
             avg_performances_per_threshold[threshold]["AVG_DIR"][k] /= len(files)
 
-    print("Averages:\n\t")
-    print(avg_performances_per_threshold)
-    print("End")
+    # print("Averages:\n\t")
+    # print(avg_performances_per_threshold)
+    # print("End")
 
     return avg_performances_per_threshold
 
@@ -431,7 +426,7 @@ if __name__ == '__main__':
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
-    test_files_folder = '../test/1/csv/'
+    test_files_folder = '../dataset_info/k_fold/'
 
     # Reload the k fold files if they were generated previously
     if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
@@ -445,7 +440,7 @@ if __name__ == '__main__':
 
     else:
         print("Generating k-fold files...")
-        k_fold = k_fold_cross_validation(dataset_file_path, k=subsets)
+        k_fold = k_fold_cross_validation(dataset_file_path, k=subsets, n_impostors=3)
 
         for i in range(len(k_fold)):
             train, test = k_fold[i]
@@ -466,4 +461,5 @@ if __name__ == '__main__':
     ''' Compute performances '''
     avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
 
-    utils.plot_performancies(avg_per_threshold)
+    utils.plot_error_rates([avg_per_threshold], ['test'])
+    utils.plot_rocs([avg_per_threshold], ['test'])
