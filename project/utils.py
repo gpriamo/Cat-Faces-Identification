@@ -1,8 +1,11 @@
 import cv2.cv2 as cv
 import math
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 from os import path
+
+from ext.intersection import intersection
 
 
 subject_to_name_file = '../dataset_info/subject-to-name.txt'
@@ -235,6 +238,42 @@ def parse_identification_results(result):
     #         ret[label] = min(distance, ret[label])
 
     return sorted(list(dict(sorted(result, key=lambda x: int(x[1]), reverse=True)).items()), key=lambda x: int(x[1]))
+
+
+def plot_performancies(avg_per_threshold):
+    thresholds = list()
+    fars = list()
+    frrs = list()
+    dirs = list()
+    for t, performs in avg_per_threshold.items():
+        thresholds.append(t)
+        fars.append(performs['AVG_FAR'])
+        frrs.append(performs['AVG_FRR'])
+        dirs.append(performs['AVG_DIR'][1])
+
+    err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
+
+    plt.figure()
+    plt.plot(thresholds, fars, label='FAR')
+    plt.plot(thresholds, frrs, label='FRR')
+    plt.xlabel('Tolerance Threshold')
+    plt.ylabel('Error Rate')
+
+    plt.scatter(err_t, err, color='gray')
+    plt.axvline(x=err_t, color='gray', linestyle='--')
+    plt.annotate('ERR', (err_t, err))
+
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+    plt.figure()
+    plt.title('Watchlist ROC')
+    plt.plot(fars, dirs, linewidth=2)
+    plt.xlabel('False Alarm Rate')
+    plt.ylabel('Detect and Identify Rate')
+    plt.grid()
+    plt.show()
 
 
 if __name__ == '__main__':

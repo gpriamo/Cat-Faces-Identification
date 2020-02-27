@@ -420,7 +420,7 @@ if __name__ == '__main__':
     face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
     # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.FisherFaceRecognizer_create()
     # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.LBPHFaceRecognizer_create()
-    test_thresholds = None  # TODO SET ACCORDINGLY
+    test_thresholds = [t for t in range(3000, 10000, 100)]  # TODO SET ACCORDINGLY
 
     # import sys
     # test_thresholds = [sys.maxsize]
@@ -465,3 +465,5 @@ if __name__ == '__main__':
 
     ''' Compute performances '''
     avg_per_threshold = evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files)
+
+    utils.plot_performancies(avg_per_threshold)
