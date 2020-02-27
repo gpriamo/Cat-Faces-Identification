@@ -186,7 +186,7 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
     return ret
 
 
-def create_distance_matrix(test_csv, resize, model, height):
+def compute_distance_matrix(test_csv, resize, model, height):
     """
     Creates an all-against-all (probes vs  gallery)
     distance matrix for identification.
@@ -221,7 +221,7 @@ def create_distance_matrix(test_csv, resize, model, height):
     # import datetime
     # serialize_matrix(matrix_ser, '../test/1/matrix{}.json'.format(datetime.datetime.now()))
 
-    return matrix, probe_labels
+    return matrix  # , probe_labels
 
 
 def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
@@ -273,7 +273,6 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
             fr_distance = first_result[1]
 
             # Impostor attempt
-            # if fr_label not in gallery_labels:
             if fr_label in impostors_labels:
                 if fr_distance <= t:
                     fa += 1
@@ -291,8 +290,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
                 continue
 
             # Try to the first index (rank) where a correct identification occurred
-            for k in range(2, len(results)):
-                res = results[k]
+            for k in range(2, len(results)+1):
+                res = results[k-1]
                 res_label = res[0]
                 res_distance = res[1]
 
@@ -418,7 +417,8 @@ if __name__ == '__main__':
     face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
     # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.FisherFaceRecognizer_create()
     # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.LBPHFaceRecognizer_create()
-    test_thresholds = [t for t in range(3000, 10000, 100)]  # TODO SET ACCORDINGLY
+    # test_thresholds = [t for t in range(3000, 10000, 100)]  # TODO SET ACCORDINGLY
+    test_thresholds = [3045, 3200, 3500, 3700, 4000]
 
     # import sys
     # test_thresholds = [sys.maxsize]
@@ -429,7 +429,7 @@ if __name__ == '__main__':
 
     k_fold_files = []  # List of the path names of all the generated k_fold <train, test> couples
 
-    test_files_folder = '../dataset_info/k_fold/'
+    test_files_folder = '../test/1/csv/'
 
     # Reload the k fold files if they were generated previously
     if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
