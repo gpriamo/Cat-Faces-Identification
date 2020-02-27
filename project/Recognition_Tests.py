@@ -273,42 +273,28 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
             fr_distance = first_result[1]
 
             # Impostor attempt
-            if fr_label in impostors_labels:
+            if probe_label in impostors_labels:
                 if fr_distance <= t:
                     fa += 1
                 else:
                     gr += 1
-                continue
 
             # Check if a correct identification @ rank 1 happened
-            if fr_label == probe_label:
+            elif fr_label == probe_label:
                 # Check if distance is less than the threshold
                 if fr_distance <= t:
                     di[1] += 1
                 else:
                     fr += 1
-                continue
 
-            # Try to the first index (rank) where a correct identification occurred
-            for k in range(2, len(results)+1):
-                res = results[k-1]
-                res_label = res[0]
-                res_distance = res[1]
+            # Find the first index (rank) in results where a correct match happens
+            else:
+                for res in results:
+                    if res[0] == probe_label:
+                        ind = results.index(res)
+                        di[ind] = di[ind] + 1 if ind in di.keys() else 1
 
-                # Match found at rank k
-                if res_label == probe_label:
-                    if res_distance <= t:
-                        di[k] = di[k] + 1 if k in di.keys() else 1  # Correct detect & identify @ rank k
-                    else:
-                        fr += 1
-                        # Stop searching as distances have gone beyond the threshold
                         break
-                elif res_distance <= t:
-                    fr += 1
-                elif res_distance > t:  # Just "else" might be enough
-                    fr += 1
-                    # Stop searching as distances have gone beyond the threshold
-                    break
 
         # write_scores(dir1scores)
 
@@ -322,7 +308,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
         higher_ranks = sorted(list(di.keys()))
         higher_ranks.remove(1)  # remove first rank, as here we're interested in the higher ones
         for k in higher_ranks:
-            if k-1 not in dir_k.keys():  # TODO need to check this as I'm not entirely sure it is correct
+            if k-1 not in dir_k.keys():
                 dir_k[k - 1] = dir_k[max(dir_k.keys())]
             dir_k[k] = (di[k] / genuine_attempts) + dir_k[k - 1]
 
