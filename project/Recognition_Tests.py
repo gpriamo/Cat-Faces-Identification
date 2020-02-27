@@ -242,17 +242,20 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
     # print(gallery_labels)
 
-    distance_matrix, probe_labels = create_distance_matrix(test_csv, resize, model=model, height=height)
+    distance_matrix = compute_distance_matrix(test_csv, resize, model=model, height=height)
 
-    print("\nStarting performances computation...")
+    # print("\nStarting performances computation...")
+    all_probes = list(distance_matrix.keys())
 
-    performances = dict()
-
-    genuine_attempts = len(probe_labels.intersection(gallery_labels))
-    impostors_labels = probe_labels.difference(gallery_labels)
+    genuine_labels = [x[1] for x in all_probes if x[1] in gallery_labels]
+    genuine_attempts = len(genuine_labels)
+    impostors_labels = [x[1] for x in all_probes if x[1] not in gallery_labels]
     impostor_attempts = len(impostors_labels)
 
-    print('Impostors: ', impostors_labels)
+    print('Impostors: ', impostor_attempts, impostors_labels, set(impostors_labels))
+    print('Genuines: ', genuine_attempts, genuine_labels, set(genuine_labels))
+
+    performances = dict()
 
     for t in thresholds:
         fa = 0  # False accepts counter
@@ -260,7 +263,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
         gr = 0  # Genuine rejects counter
         di = dict()  # Correct detect and identification @ rank k counter
         di[1] = 0
-        for probe in distance_matrix.keys():
+        for probe in all_probes:
             probe_label = probe[1]
 
             results = distance_matrix[probe]
