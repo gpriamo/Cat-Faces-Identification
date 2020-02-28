@@ -123,7 +123,7 @@ def detect_cat_eyes(file, show=False, eyes_ScaleFactor=1.08, eyes_minNeighbors=3
 
     else:
         print("No eyes detected!")
-        file_eyes = open('./gallery_eyes_color.txt')
+        file_eyes = open('../dataset_info/gallery_eyes_color.txt')
         lines=[]
         for line in file_eyes:
             l = line.split('\n')[0]
@@ -283,7 +283,7 @@ def final_eyes_color(possible_classes_1, possible_classes_2):
 
 
 def find_subject_from_eyes_color(color_eyes, subj_list):
-    file_eyes = open('./gallery_eyes_color.txt')
+    file_eyes = open('../dataset_info/gallery_eyes_color.txt')
     lines=[]
     for line in file_eyes:
         l = line.split('\n')[0]
