@@ -117,11 +117,12 @@ def create_csv(base_path, output_dir):
 
                 abs_path = "%s/%s" % (subject_path, filename)
                 s = "%s%s%d" % (abs_path, separator, label)
-                if "aligned" in s:
-                    # lines_aligned.append(s)
-                    pass
-                else:
-                    lines.append(s)
+                # if "aligned" in s:
+                #     # lines_aligned.append(s)
+                #     pass
+                # else:
+                #     lines.append(s)
+                lines.append(s)
             # label = label + 1
 
     # lines_aligned.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split("_")[0])))
@@ -278,7 +279,7 @@ def plot_error_rates(performancies, model_names):
         if len(err) != 0:
             plt.scatter(err_t, err, color='gray')
             plt.axvline(x=err_t, color='gray', linestyle='--')
-            plt.annotate('ERR', (err_t, err), xytext=(err_t + 50, err + .01))
+            plt.annotate('ERR', (err_t, err))
 
     plt.xlabel('Tolerance Threshold')
     plt.ylabel('Error Rate')

@@ -404,8 +404,8 @@ def parse_args():
     parser = ArgumentParser()
     parser.add_argument('input_dataset', help='The path of the input dataset')
     parser.add_argument('-o', '--output', help='The path of the output directory', default='../test/k_fold/complete')
-    parser.add_argument('-k', '--subsets', help='The number of subsets in which to divide the dataset', type=int, default=4)
-    parser.add_argument('-i', '--impostors', help='The number of impostors to use', type=int, default=3)
+    parser.add_argument('-k', '--subsets', help='The number of subsets in which to divide the dataset', type=int, default=5)
+    parser.add_argument('-i', '--impostors', help='The number of impostors to use', type=int, default=5)
     return parser.parse_args()
 
 
@@ -497,7 +497,7 @@ if __name__ == '__main__':
 
     radius = [1, 2]
     neighbors = [4, 8, 12, 16]
-    grid = [8, 12]
+    grid = [4, 8]
     models_tot = 24
 
     test_thresholds = np.linspace(10, 150, 100)
