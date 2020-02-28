@@ -13,11 +13,15 @@ subject_to_name = None
 dataset_images_dir = '../images/dataset/cropped'
 # dataset_images_dir = '../images/dataset/best'
 # dataset_images_dir = '../images/dataset/best_aligned'
-impostors_images_dir = '../images/dataset/impostors'
 dataset_info_dir = '../dataset_info/'
 
 
 def show_image(im, matplot=True):
+    """
+    Shows a single image.
+    :param im: image to show.
+    :param matplot: flag to select the library to be used to display the image.
+    """
     if matplot:
         # show image using matplotlib
         plt.figure()
@@ -35,6 +39,10 @@ def show_image(im, matplot=True):
 
 
 def show_images(images):
+    """
+    Shows a set of images in the same window.
+    :param images: images to show.
+    """
     if len(images) < 4:
         size = (len(images), 1)
     else:
@@ -85,7 +93,6 @@ def create_csv(base_path, output_dir):
     :param output_dir:
         directory where to save CSV files.
     """
-    # label = 1
     separator = ";"
 
     print("Creating CSV file...")
@@ -111,7 +118,8 @@ def create_csv(base_path, output_dir):
                 abs_path = "%s/%s" % (subject_path, filename)
                 s = "%s%s%d" % (abs_path, separator, label)
                 if "aligned" in s:
-                    lines_aligned.append(s)
+                    # lines_aligned.append(s)
+                    pass
                 else:
                     lines.append(s)
             # label = label + 1
@@ -123,10 +131,6 @@ def create_csv(base_path, output_dir):
     fname_al = "subjects_aligned.csv"
 
     print(base_path)
-    # if "impostors" in base_path:
-    #     print("here")
-    #     fname = "impostors.csv"
-    #     fname_al = "impostors_aligned.csv"
 
     with open(path.join(output_dir, fname), "w+") as fl:
         fl.write(str.join("\n", lines))
@@ -136,7 +140,15 @@ def create_csv(base_path, output_dir):
         fl.write("\n")
 
 
-def read_csv(filename, resize=False, rgb=False, mapping=False):
+def read_csv(filename, resize=False, mapping=False):
+    """
+    Parses a csv file containing the path to the images to be used for the recognition operations.
+    :param filename: location of the csv file.
+    :param resize: flag to specify whether images
+    :param mapping: flag to switch the output type.
+    :return: if mapping = False: a list of loaded images alongside a list of their respective labels.
+    If mapping = True: a list with just the files' names and a label -> filename mapping is returned.
+    """
     labels = []
     faces = []
 
@@ -145,9 +157,7 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
             label_to_file = dict()
             files = []
 
-        # {BEGIN} TOREMOVE
         dic = dict()
-        # {END} TOREMOVE
 
         for line in file.readlines():
             if line == "\n":
@@ -158,13 +168,11 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
             im_file = spl[0]
             label = int(spl[1])
 
-            # {BEGIN} TOREMOVE
             if label not in dic.keys():
                 dic[label] = 0
             # elif dic[label] >= 10:
             #     continue
             dic[label] += 1
-            # {END} TOREMOVE
 
             if mapping:
                 if label not in label_to_file.keys():
@@ -179,19 +187,10 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
                 if resize:
                     photo = resize_image(photo, 100, 100)
 
-                if rgb:
-                    # Convert input image from BGR to RGB (needed by dlib)
-                    photo = cv.cvtColor(photo, cv.COLOR_BGR2RGB)
-
                 faces.append(photo)
                 labels.append(label)
 
-    # {BEGIN} TOREMOVE
     # print(dic)
-
-    # for key in label_to_file.keys():
-    #     print(key, label_to_file[key])
-    # {END} TOREMOVE
 
     if mapping:
         return label_to_file, files
@@ -200,6 +199,9 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
 
 
 def _get_subject_mapping():
+    """
+    Maps the subjects' labels to their true names.
+    """
     ret = dict()
     with open(subject_to_name_file, "r+") as fl:
         for line in fl.readlines():
@@ -209,6 +211,9 @@ def _get_subject_mapping():
 
 
 def get_subject_name(label):
+    """
+    :return: the true name of the subject with the specified label
+    """
     global subject_to_name
 
     if subject_to_name is None:
@@ -222,6 +227,9 @@ def get_subject_name(label):
 
 
 def get_label(file):
+    """
+    :return: a label from a file name.
+    """
     return int(file.split("/")[-2].replace('s', ''))
 
 
@@ -240,12 +248,12 @@ def parse_identification_results(result):
     return sorted(list(dict(sorted(result, key=lambda x: int(x[1]), reverse=True)).items()), key=lambda x: int(x[1]))
 
 
-def print_avg_performancies(performancies, model_name):
+def print_avg_performances(performances, model_name):
     print('SUMMARY of {}:'.format(model_name))
-    print('\tFAR:', performancies['AVG_FAR'])
-    print('\tFRR:', performancies['AVG_FRR'])
-    print('\tGRR:', performancies['AVG_GRR'])
-    print('\tDIR at rank 1:', performancies['AVG_DIR'][1], '\n')
+    print('\tFAR:', performances['AVG_FAR'])
+    print('\tFRR:', performances['AVG_FRR'])
+    print('\tGRR:', performances['AVG_GRR'])
+    print('\tDIR at rank 1:', performances['AVG_DIR'][1], '\n')
 
 
 def plot_error_rates(performancies, model_names):
@@ -301,4 +309,3 @@ def plot_rocs(performancies, model_names):
 
 if __name__ == '__main__':
     create_csv(dataset_images_dir, dataset_info_dir)
-    # create_csv(impostors_images_dir, dataset_info_dir)
