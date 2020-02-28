@@ -1,11 +1,16 @@
 from argparse import ArgumentParser
-import cv2.cv2 as cv
 import numpy as np
-
-from utils import *
+import cv2.cv2 as cv
+import os
+import utils
 
 
 def norm_0_255(source: np.ndarray):
+    """
+    Normalizes an image.
+    :param source: image to normalize.
+    :return: normalized image.
+    """
     src = source.copy()
     dst = None
 
@@ -21,16 +26,20 @@ def norm_0_255(source: np.ndarray):
 
 
 def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=False, ret_labels=False):
-    faces, labels = read_csv(csv_filename, resize)
+    """
+    Trains a face recognizer.
+
+    :param model: face recognizer to be trained.
+    :param csv_filename: file containing the images to be used for the training process.
+    :param resize: flag to specify whether images should be resized.
+    :param ret_labels: flag to specify whether the list of labels used for training should be returned.
+    :return: the trained model and the height of the images used for the training.
+    """
+    faces, labels = utils.read_csv(csv_filename, resize)
 
     #  print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(set(labels))))
 
     height = faces[0].shape[0]
-
-    # sizes = set()
-    # for image in faces:
-    #     sizes.add(image.shape)
-    # print(sizes)
 
     model.train(faces, np.array(labels))
 
@@ -50,13 +59,30 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
             show_faces=False,
             save_faces=False
             ):
-    if not path.exists(probe_image):
+    """
+    Performs a face recognition operation.
+
+    :param model: face recognizer.
+    :param height: height of the images used to train the model.
+    :param probe_image: path to the image of the probe.
+    :param probe_label: label of the probe.
+    :param resize: flag to specify whether the probe image should be resized.
+    :param identification: flag to specify the recognition operation
+    to carry out (True: identification, False: verification)
+    :param save_dir: directory where results should be saved.
+    :param show_mean: if True, the mean image is shown.
+    :param save_mean: if True, the mean image is saved in save_dir.
+    :param show_faces: if True, eigenfaces/fisherfaces are shown.
+    :param save_faces: if True, eigenfaces/fisherfaces are saved in save_dir.
+    :return: the result of the prediction.
+    """
+    if not os.path.exists(probe_image):
         raise RuntimeError("File {} does not exist!".format(probe_image))
 
     input_face = cv.imread(probe_image, 0)
 
     if resize:
-        input_face = resize_image(input_face, 100, 100)
+        input_face = utils.resize_image(input_face, 100, 100)
 
     if identification:
         coll: cv.face_StandardCollector = cv.face.StandardCollector_create()
@@ -64,8 +90,6 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
         # print(coll.getResults())
         # print(coll.getMinDist())
         # print(coll.getMinLabel())
-
-        # results = parse_identification_results(coll.getResults())
 
         results = sorted(coll.getResults(), key=lambda x: x[1])
 
@@ -83,8 +107,8 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
 
     if probe_label is not None:
         print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
-              .format(prediction[0], get_subject_name(prediction[0]), prediction[1],
-                      probe_label, get_subject_name(probe_label),
+              .format(prediction[0], utils.get_subject_name(prediction[0]), prediction[1],
+                      probe_label, utils.get_subject_name(probe_label),
                       "Success!" if prediction[0] == probe_label else "Failure!"))
 
     if type(model) is cv.face_LBPHFaceRecognizer:
@@ -109,9 +133,9 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
         normalized_mean = norm_0_255(reshaped_mean)
 
         if show_mean:
-            show_image(normalized_mean)
+            utils.show_image(normalized_mean)
         elif save_mean and save_dir is not None:
-            cv.imwrite(path.join(save_dir, "mean.png"), normalized_mean)
+            cv.imwrite(os.path.join(save_dir, "mean.png"), normalized_mean)
 
     if show_faces or save_faces:
         eigenvalues: np.ndarray = model.getEigenValues()
@@ -131,53 +155,47 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
             if show_faces:
                 faces.append(cgrayscale)
             elif save_faces and save_dir is not None:
-                file_name = path.join(save_dir, "eigenface_{}.png".format(i))
+                file_name = os.path.join(save_dir, "eigenface_{}.png".format(i))
                 cv.imwrite(file_name, norm_0_255(cgrayscale))
 
         if show_faces:
-            show_images(faces)
-
-    # TODO Think about writing the reconstruction part
+            utils.show_images(faces)
 
 
 def save_model(model: cv.face_BasicFaceRecognizer, save_dir, height, uid=0):
-    file_name = path.join(save_dir, "model_{0}_{1}.xml".format(uid, height))
+    """
+    Saves a recognizer model to file.
+    :param model: model to be saved.
+    :param save_dir: path where the model should be saved.
+    :param height: height of the images used for the training.
+    :param uid: identifier of the model to save.
+    """
+    file_name = os.path.join(save_dir, "model_{0}_{1}.xml".format(uid, height))
     print("Saving model to: ", file_name)
     model.save(file_name)
 
 
 def load_model(model: cv.face_BasicFaceRecognizer, file_name):
+    """
+    Loads a previously-saved model from file.
+    :param model: empty model the file should be loaded into.
+    :param file_name: the file where the model is stored.
+    :return: the loaded model.
+    """
     model.read(file_name)
     height = file_name.split("_")[-1].split(".")[0]
 
     return model, int(height)
 
 
-def test_aligned(model: cv.face_BasicFaceRecognizer):
-    mod, hei = train_recongizer(model, "../dataset_info/bak/best/subjects_aligned.csv")
-    predict(model=mod, height=hei, probe_image="../images/dataset/cropped/t/27_cropped_aligned.jpg", probe_label=7,
-            show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, probe_image="../images/dataset/cropped/c/9_cropped_aligned.jpeg", probe_label=0,
-            show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, probe_image="../images/dataset/cropped/Rudi/9_cropped_aligned.jpeg", probe_label=5,
-            show_mean=False, show_faces=False, identification=False)
-    # save_model(mod, hei)
-
-    # mod2, hei2 = load_model(models_dir+"eigenfaces/model_0_200.xml")
-    # predict(model=mod2, height=hei2, face="../images/dataset/cropped/t/27_cropped_aligned.jpg", sample_label=1,
-    #         show_mean=False, show_faces=False)
-    # predict(model=mod2, height=hei2, face="../images/dataset/cropped/c/9_cropped_aligned.jpeg", sample_label=0,
-    #         show_mean=False, show_faces=False)
-
-
-def test_cropped(model: cv.face_BasicFaceRecognizer):
-    mod, hei = train_recongizer(model, "../dataset_info/bak/best/subjects.csv", resize=True)
-    predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1,
-            show_mean=False, show_faces=True, identification=False)
-    predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2,
-            show_mean=False, show_faces=False, identification=False)
-    predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8,
-            show_mean=False, show_faces=False, identification=False)
+# def test_cropped(model: cv.face_BasicFaceRecognizer):
+#     mod, hei = train_recongizer(model, "../dataset_info/bak/best/subjects.csv", resize=True)
+#     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1,
+#             show_mean=False, show_faces=True, identification=False)
+#     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2,
+#             show_mean=False, show_faces=False, identification=False)
+#     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8,
+#             show_mean=False, show_faces=False, identification=False)
     # save_model(mod, hei)
 
 
@@ -192,11 +210,7 @@ if __name__ == '__main__':
 
     model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
 
-    # TODO check params
     if args.recognizer == 0:
-        # model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create(num_components=30000)
-        # model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create(threshold=2350.0)
-        # model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create(threshold=100.0, num_components=10)
         model: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
 
     elif args.recognizer == 1:
@@ -205,5 +219,4 @@ if __name__ == '__main__':
     elif args.recognizer == 2:
         model: cv.face_BasicFaceRecognizer = cv.face.LBPHFaceRecognizer_create()
 
-    # test_aligned(model)
-    test_cropped(model)
+    # test_cropped(model)

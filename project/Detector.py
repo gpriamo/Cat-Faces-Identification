@@ -1,15 +1,10 @@
 from argparse import ArgumentParser
 import cv2.cv2 as cv
+import utils
 import math
 import numpy as np
 from os import path
 from PIL import Image
-
-from utils import *
-
-
-# def_SF = 1.05  # play around with it (i.e. 1.05, 1.3 etc) Good ones: 1.04 (haar), 1.05
-# def_N = 2  # play around with it (3,4,5,6) Good ones: 2 (haar)
 
 cascade_models_dir = '../models/detection/'
 cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_extended.xml',
@@ -102,7 +97,7 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
             cropped = img_orig[y:y + h, x: x + w]
 
     if show:
-        show_image(img)
+        utils.show_image(img)
 
     return cropped
 
@@ -270,14 +265,6 @@ if __name__ == '__main__':
     out_dir = args.output
     image = args.input_image
 
-    # TODO Remove
-    # split = image.split("/")
-    # dir_name = split[-2]
-    # file_name = split[-1].split(".")[0]
-    # file_extension = split[-1].split(".")[1]
-    #
-    # save_dir = out_dir + dir_name + "/"
-
     dir, file = path.split(image)
     dir_name = path.basename(dir)
     file_name, file_extension = path.splitext(file)
@@ -292,7 +279,7 @@ if __name__ == '__main__':
     eyes_ms = (args.eyes_minsize, args.eyes_minsize)
 
     out = detect_cat_face(image, classifier=detector, show=True, scaleFactor=sf, minNeighbors=n,
-            eyes_ScaleFactor=eyes_sf, eyes_minNeighbors=eyes_n, eyes_minSize=eyes_ms)
+                          eyes_ScaleFactor=eyes_sf, eyes_minNeighbors=eyes_n, eyes_minSize=eyes_ms)
     if len(out) == 2:
         face = out[0]
         # show_image(img)
