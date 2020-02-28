@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import cv2.cv2 as cv
 import numpy as np
 
 from utils import *
@@ -22,7 +23,7 @@ def norm_0_255(source: np.ndarray):
 def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=False, ret_labels=False):
     faces, labels = read_csv(csv_filename, resize)
 
-    print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(set(labels))))
+    #  print("Total faces: {0}\nTotal labels: {1}".format(len(faces), len(set(labels))))
 
     height = faces[0].shape[0]
 

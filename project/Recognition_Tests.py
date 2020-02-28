@@ -1,12 +1,14 @@
+from argparse import ArgumentParser
+import cv2.cv2 as cv
+from itertools import product
+import json
+import numpy as np
+import random
 import os
+
 import Recognizer as rec
 import utils
-import cv2.cv2 as cv
-import json
-import random
 
-
-# impostors_csv = '../dataset_info/impostors.csv'
 
 """
 def k_fold_cross_validation(dataset_path, k=10, tot_subjects=23):
@@ -136,7 +138,7 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
     ls = list(label_to_file.values())
 
     impostors = list(random.choices(list(label_to_file.keys()), k=k * n_impostors))
-#    print(impostors)
+    # print(impostors)
 
     for li in ls:
         # shuffle the lists in order to get different results for each run of the function
@@ -198,7 +200,7 @@ def compute_distance_matrix(test_csv, resize, model, height):
     :return: generated distance matrix
     """
 
-    print("Creating distance matrix...")
+    # print("Creating distance matrix...")
 
     matrix = dict()
     # matrix_ser = dict()  # matrix to be serialized
@@ -237,7 +239,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     :return: dictionary containing the computed rates
     """
 
-    print("Evaluating performances for files {} {}...\n".format(train_csv, test_csv))
+    # print("Evaluating performances for files {} {}...\n".format(train_csv, test_csv))
 
     model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
     # print(gallery_labels)
@@ -252,8 +254,8 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
     impostors_labels = [x[1] for x in all_probes if x[1] not in gallery_labels]
     impostor_attempts = len(impostors_labels)
 
-    print('Impostors: ', impostor_attempts, impostors_labels, set(impostors_labels))
-    print('Genuines: ', genuine_attempts, genuine_labels, set(genuine_labels))
+    # print('Impostors: ', impostor_attempts, impostors_labels, set(impostors_labels))
+    # print('Genuines: ', genuine_attempts, genuine_labels, set(genuine_labels))
 
     performances = dict()
 
@@ -315,7 +317,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
         performances[t] = dict([("FRR", frr), ("FAR", far), ("GRR", grr), ("DIR", dir_k)])
 
     # print(performances)
-    print("Done\n--\n")
+    # print("Done\n--\n")
 
     return performances
 
@@ -342,7 +344,7 @@ def evaluate_avg_performances(recognizer, thresholds, files):
     :param files: iterable containing couples of training and testing files
     :return: dictionary with average rates
     """
-    print("Starting to compute performances...")
+    # print("Starting to compute performances...")
 
     avg_performances_per_threshold = dict()
 
@@ -366,7 +368,7 @@ def evaluate_avg_performances(recognizer, thresholds, files):
                 else:
                     avg_performances_per_threshold[threshold]["AVG_DIR"][k] += perf[threshold]["DIR"][k]
 
-    print("Finishing averages computation...")
+    # print("Finishing averages computation...")
 
     for threshold in test_thresholds:
         avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(files)
@@ -398,7 +400,129 @@ def evaluate_avg_performances(recognizer, thresholds, files):
 #         fd.write(imp_file+";"+str(utils.get_label(imp_file))+"\n")
 
 
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('input_dataset', help='The path of the input dataset')
+    parser.add_argument('-o', '--output', help='The path of the output directory', default='../test/k_fold/complete')
+    parser.add_argument('-k', '--subsets', help='The number of subsets in which to divide the dataset', type=int, default=4)
+    parser.add_argument('-i', '--impostors', help='The number of impostors to use', type=int, default=3)
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
+    args = parse_args()
+
+    subsets = args.subsets
+    test_files_folder = os.path.join(args.output, 'csv')
+    k_fold_files = list()
+
+    # Gerenerating/loading k-fold subsets
+
+    if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) == subsets:
+        for i in range(subsets):
+            train_fn = os.path.join(test_files_folder, "{}_train.csv".format(i + 1))
+            test_fn = os.path.join(test_files_folder, "{}_test.csv".format(i + 1))
+
+            k_fold_files.append((train_fn, test_fn))
+    else:
+        k_fold = k_fold_cross_validation(args.input_dataset, k=subsets, n_impostors=args.impostors)
+
+        for i in range(len(k_fold)):
+            train, test = k_fold[i]
+
+            train_fn = os.path.join(test_files_folder, "{}_train.csv".format(i + 1))
+            with open(train_fn, 'w+') as fi:
+                fi.writelines("\n".join(train))
+
+            test_fn = os.path.join(test_files_folder, "{}_test.csv".format(i + 1))
+            with open(test_fn, 'w+') as fi:
+                fi.writelines("\n".join(test))
+
+            k_fold_files.append((train_fn, test_fn))
+
+    print('=' * 80)
+    print('K fold cross vaidation using k = {} subsets and {} impostors'.format(subsets, args.impostors))
+    print('=' * 80)
+
+    print('\n' + '-' * 80)
+    print('Eigenfaces')
+    print('-' * 80)
+
+    default_components = 10000  # h * w
+    n_components = [10, 80, default_components // 10, default_components]
+
+    test_thresholds = np.linspace(1000, 5000, 100)
+
+    avgs = list()
+    model_names = list()
+
+    for nc in n_components:
+        print('Evaluating model #{} out of 4...'.format(len(avgs) + 1))
+
+        face_recognizer = cv.face.EigenFaceRecognizer_create(num_components=nc)
+        model_names.append('Eig. with {} comp'.format(nc))
+
+        avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
+
+    print('Done\n')
+
+    utils.plot_error_rates(avgs, model_names)
+    utils.plot_rocs(avgs, model_names)
+
+    print('\n' + '-' * 80)
+    print('Fisherfaces')
+    print('-' * 80)
+
+    test_thresholds = np.linspace(100, 1500, 100)
+
+    avgs = list()
+    model_names = list()
+
+    for nc in n_components:
+        print('Evaluating model #{} out of 4...'.format(len(avgs) + 1))
+
+        face_recognizer = cv.face.FisherFaceRecognizer_create(num_components=nc)
+        model_names.append('Fisher with {} comp'.format(nc))
+
+        avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
+
+    print('Done\n')
+
+    utils.plot_error_rates(avgs, model_names)
+    utils.plot_rocs(avgs, model_names)
+
+    print('\n' + '-' * 80)
+    print('LBPH')
+    print('-' * 80)
+
+    radius = [1, 2]
+    neighbors = [4, 8, 12, 16]
+    grid = [8, 12]
+    models_tot = 24
+
+    test_thresholds = np.linspace(10, 150, 100)
+
+    avgs = list()
+    model_names = list()
+
+    for r, n, g in product(radius, neighbors, grid):
+        if r == 1 and n > 8:
+            continue
+
+        print('Evaluating model #{} out of 24...'.format(len(avgs) + 1))
+
+        face_recognizer = cv.face.LBPHFaceRecognizer_create(radius=r, neighbors=n, grid_x=g, grid_y=g)
+        model_names.append('LBPH with radius {}, {} neighs, {}x{} grid'.format(r, n, g, g))
+
+        avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
+
+    print('Done\n')
+
+    utils.plot_error_rates(avgs, model_names)
+    utils.plot_rocs(avgs, model_names)
+
+
+"""
     ''' Initialize recognizer and thresholds to be tested '''
     face_recognizer: cv.face_BasicFaceRecognizer = cv.face.EigenFaceRecognizer_create()
     # face_recognizer: cv.face_BasicFaceRecognizer = cv.face.FisherFaceRecognizer_create()
@@ -452,3 +576,4 @@ if __name__ == '__main__':
 
     utils.plot_error_rates([avg_per_threshold], ['test'])
     utils.plot_rocs([avg_per_threshold], ['test'])
+"""

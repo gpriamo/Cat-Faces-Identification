@@ -116,7 +116,7 @@ def create_csv(base_path, output_dir):
                     lines.append(s)
             # label = label + 1
 
-    lines_aligned.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split("_")[0])))
+    # lines_aligned.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split("_")[0])))
     lines.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split(".")[0])))
 
     fname = "subjects.csv"
@@ -187,7 +187,7 @@ def read_csv(filename, resize=False, rgb=False, mapping=False):
                 labels.append(label)
 
     # {BEGIN} TOREMOVE
-    print(dic)
+    # print(dic)
 
     # for key in label_to_file.keys():
     #     print(key, label_to_file[key])
@@ -240,6 +240,14 @@ def parse_identification_results(result):
     return sorted(list(dict(sorted(result, key=lambda x: int(x[1]), reverse=True)).items()), key=lambda x: int(x[1]))
 
 
+def print_avg_performancies(performancies, model_name):
+    print('SUMMARY of {}:'.format(model_name))
+    print('\tFAR:', performancies['AVG_FAR'])
+    print('\tFRR:', performancies['AVG_FRR'])
+    print('\tGRR:', performancies['AVG_GRR'])
+    print('\tDIR at rank 1:', performancies['AVG_DIR'][1], '\n')
+
+
 def plot_error_rates(performancies, model_names):
     plt.figure()
 
@@ -254,12 +262,15 @@ def plot_error_rates(performancies, model_names):
 
         err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
 
+        print('{}: ERR of {} reached at threshold {}'.format(model_name, err, err_t))
+
         plt.plot(thresholds, fars, label=model_name + ': FAR')
         plt.plot(thresholds, frrs, label=model_name + ': FRR')
 
-        plt.scatter(err_t, err, color='gray')
-        plt.axvline(x=err_t, color='gray', linestyle='--')
-        plt.annotate('ERR', (err_t, err), xytext=(err_t + 50, err + .02))
+        if len(err) != 0:
+            plt.scatter(err_t, err, color='gray')
+            plt.axvline(x=err_t, color='gray', linestyle='--')
+            plt.annotate('ERR', (err_t, err), xytext=(err_t + 50, err + .01))
 
     plt.xlabel('Tolerance Threshold')
     plt.ylabel('Error Rate')
