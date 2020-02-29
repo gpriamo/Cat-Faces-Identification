@@ -249,12 +249,12 @@ def parse_identification_results(result):
     return sorted(list(dict(sorted(result, key=lambda x: int(x[1]), reverse=True)).items()), key=lambda x: int(x[1]))
 
 
-def print_avg_performances(performances, model_name):
-    print('SUMMARY of {}:'.format(model_name))
-    print('\tFAR:', performances['AVG_FAR'])
-    print('\tFRR:', performances['AVG_FRR'])
-    print('\tGRR:', performances['AVG_GRR'])
-    print('\tDIR at rank 1:', performances['AVG_DIR'][1], '\n')
+def print_avg_performances(performances, threshold):
+    print('SUMMARY at threshold {}:'.format(threshold))
+    print('\tFAR:', performances[threshold]['AVG_FAR'])
+    print('\tFRR:', performances[threshold]['AVG_FRR'])
+    print('\tGRR:', performances[threshold]['AVG_GRR'])
+    print('\tDIR at rank 1:', performances[threshold]['AVG_DIR'][1], '\n')
 
 
 def plot_error_rates(performancies, model_names, normalize_threshols=False):
