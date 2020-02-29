@@ -1,0 +1,3 @@
+LBPH without eye color detection: ERR of [0.14] reached at threshold [177.1990172]
+LBPH with eye color detection: ERR of [0.26217949] reached at threshold [178.86332669]
+
