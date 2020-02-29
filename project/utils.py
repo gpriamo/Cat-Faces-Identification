@@ -257,7 +257,7 @@ def print_avg_performances(performances, model_name):
     print('\tDIR at rank 1:', performances['AVG_DIR'][1], '\n')
 
 
-def plot_error_rates(performancies, model_names):
+def plot_error_rates(performancies, model_names, normalize_threshols=False):
     plt.figure()
 
     for avg_per_threshold, model_name in zip(performancies, model_names):
@@ -269,16 +269,16 @@ def plot_error_rates(performancies, model_names):
             fars.append(performs['AVG_FAR'])
             frrs.append(performs['AVG_FRR'])
 
-        # Normalizing thresholds in [0, 1]
-        # thresholds = np.array(thresholds)
-        # thresholds = (thresholds - np.min(thresholds)) / (np.max(thresholds) - np.min(thresholds))
+        if normalize_threshols:
+            thresholds = np.array(thresholds)
+            thresholds = (thresholds - np.min(thresholds)) / (np.max(thresholds) - np.min(thresholds))
+
+        plt.plot(thresholds, fars, label=model_name + ': FAR')
+        plt.plot(thresholds, frrs, label=model_name + ': FRR')
 
         err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
 
         print('{}: ERR of {} reached at threshold {}'.format(model_name, err, err_t))
-
-        plt.plot(thresholds, fars, label=model_name + ': FAR')
-        plt.plot(thresholds, frrs, label=model_name + ': FRR')
 
         if len(err) != 0:
             plt.scatter(err_t, err, color='gray')
