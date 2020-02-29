@@ -129,16 +129,16 @@ def create_csv(base_path, output_dir):
     lines.sort(key=lambda l: (int(l.split("/")[-2].replace('s', '')), int(l.split("/")[-1].split(".")[0])))
 
     fname = "subjects.csv"
-    fname_al = "subjects_aligned.csv"
+    # fname_al = "subjects_aligned.csv"
 
-    print(base_path)
+    # print(base_path)
 
     with open(path.join(output_dir, fname), "w+") as fl:
         fl.write(str.join("\n", lines))
         fl.write("\n")
-    with open(path.join(output_dir, fname_al), "w+") as fl:
-        fl.write(str.join("\n", lines_aligned))
-        fl.write("\n")
+    # with open(path.join(output_dir, fname_al), "w+") as fl:
+    #     fl.write(str.join("\n", lines_aligned))
+    #     fl.write("\n")
 
 
 def read_csv(filename, resize=False, mapping=False):
