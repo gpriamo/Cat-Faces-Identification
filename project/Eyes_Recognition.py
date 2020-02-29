@@ -358,6 +358,7 @@ def predict(subj_list, model: cv.face_BasicFaceRecognizer, height, probe_image, 
                       .format(limited_subjects_list[0][0], get_subject_name(limited_subjects_list[0][0]), limited_subjects_list[0][1],
                               probe_label, get_subject_name(probe_label),
                               "Success!" if limited_subjects_list[0][0] == probe_label else "Failure!"))
+            return limited_subjects_list
 
 
         else:
@@ -366,6 +367,7 @@ def predict(subj_list, model: cv.face_BasicFaceRecognizer, height, probe_image, 
                       .format(coll.getMinLabel(), get_subject_name(coll.getMinLabel()), coll.getMinDist(),
                               probe_label, get_subject_name(probe_label),
                               "Success!" if coll.getMinLabel() == probe_label else "Failure!"))
+            return results
 
 
 
