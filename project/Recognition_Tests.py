@@ -7,6 +7,7 @@ import random
 import os
 
 import Recognizer as rec
+import Eyes_Recognizer as eye_rec
 import utils
 
 
@@ -188,7 +189,7 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
     return ret
 
 
-def compute_distance_matrix(test_csv, resize, model, height):
+def compute_distance_matrix(test_csv, resize, model, height, use_eyes=False):
     """
     Creates an all-against-all (probes vs  gallery)
     distance matrix for identification.
@@ -212,8 +213,12 @@ def compute_distance_matrix(test_csv, resize, model, height):
         label = utils.get_label(file)
         probe_labels.add(label)
 
-        prediction = rec.predict(model=model, height=height, resize=resize,
-                                 probe_label=label, probe_image=file, identification=True)
+        if not use_eyes:
+            prediction = rec.predict(model=model, height=height, resize=resize,
+                                    probe_label=label, probe_image=file, identification=True)
+        else:
+            prediction = eye_rec.predict(model=model, height=height, resize=resize,
+                                    probe_label=label, probe_image=file, identification=True)
 
         matrix[(file, label)] = prediction
 
@@ -226,7 +231,7 @@ def compute_distance_matrix(test_csv, resize, model, height):
     return matrix  # , probe_labels
 
 
-def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True):
+def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True, use_eyes=False):
     """
     Compute FAR, FRR, GRR and DIR(k) for each threshold passed in input
     based on the couple of training and testing files provided.
@@ -244,7 +249,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True):
     model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
     # print(gallery_labels)
 
-    distance_matrix = compute_distance_matrix(test_csv, resize, model=model, height=height)
+    distance_matrix = compute_distance_matrix(test_csv, resize, model=model, height=height, use_eyes=use_eyes)
 
     # print("\nStarting performances computation...")
     all_probes = list(distance_matrix.keys())
@@ -334,7 +339,7 @@ def load_matrix(file):
         return json.loads(fi.read())
 
 
-def evaluate_avg_performances(recognizer, thresholds, files):
+def evaluate_avg_performances(recognizer, thresholds, files, use_eyes=False):
     """
     Computes averages of what is generated
     by the evaluate_performances() function.
@@ -348,15 +353,15 @@ def evaluate_avg_performances(recognizer, thresholds, files):
 
     avg_performances_per_threshold = dict()
 
-    for threshold in test_thresholds:
+    for threshold in thresholds:
         avg_performances_per_threshold[threshold] = dict([("AVG_FRR", 0), ("AVG_FAR", 0), ("AVG_GRR", 0),
                                                           ("AVG_DIR", dict())])
 
     for train_f, test_f in files:
         # Returns a dictionary "Threshold: rates for the threshold" based on the 'train' & 'test' files
-        perf = evaluate_performances(model=recognizer, thresholds=thresholds, train_csv=train_f, test_csv=test_f)
+        perf = evaluate_performances(model=recognizer, thresholds=thresholds, train_csv=train_f, test_csv=test_f, use_eyes=use_eyes)
 
-        for threshold in test_thresholds:
+        for threshold in thresholds:
             avg_performances_per_threshold[threshold]["AVG_FRR"] += perf[threshold]["FRR"]
             avg_performances_per_threshold[threshold]["AVG_FAR"] += perf[threshold]["FAR"]
             avg_performances_per_threshold[threshold]["AVG_GRR"] += perf[threshold]["GRR"]
@@ -369,7 +374,7 @@ def evaluate_avg_performances(recognizer, thresholds, files):
 
     # print("Finishing averages computation...")
 
-    for threshold in test_thresholds:
+    for threshold in thresholds:
         avg_performances_per_threshold[threshold]["AVG_FRR"] /= len(files)
         avg_performances_per_threshold[threshold]["AVG_FAR"] /= len(files)
         avg_performances_per_threshold[threshold]["AVG_GRR"] /= len(files)

@@ -187,7 +187,7 @@ def load_model(model: cv.face_BasicFaceRecognizer, file_name):
 
 
 # def test_cropped(model: cv.face_BasicFaceRecognizer):
-#     mod, hei = train_recongizer(model, "../dataset_info/bak/best/subjects.csv", resize=True)
+#     mod, hei = train_recongizer(model, "../dataset_info/complete.csv", resize=True)
 #     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1, identification=False)
 #     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2, identification=False)
 #     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8, identification=False)
