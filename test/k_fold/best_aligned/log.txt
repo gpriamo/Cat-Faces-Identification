@@ -47,16 +47,17 @@ Evaluating model #11 out of 24...
 Evaluating model #12 out of 24...
 Done
 
-LBPH with radius 1, 4 neighs, 4x4 grid: ERR of [] reached at threshold []
-LBPH with radius 1, 4 neighs, 8x8 grid: ERR of [0.36136914] reached at threshold [30.73579087]
-LBPH with radius 1, 8 neighs, 4x4 grid: ERR of [0.29410022] reached at threshold [10.84193225]
-LBPH with radius 1, 8 neighs, 8x8 grid: ERR of [0.20777439] reached at threshold [92.73589554]
-LBPH with radius 2, 4 neighs, 4x4 grid: ERR of [] reached at threshold []
-LBPH with radius 2, 4 neighs, 8x8 grid: ERR of [0.32016509] reached at threshold [41.1922686]
-LBPH with radius 2, 8 neighs, 4x4 grid: ERR of [0.24251539] reached at threshold [14.16566335]
-LBPH with radius 2, 8 neighs, 8x8 grid: ERR of [0.20867347] reached at threshold [114.9039849]
-LBPH with radius 2, 12 neighs, 4x4 grid: ERR of [0.26324561] reached at threshold [27.85406017]
-LBPH with radius 2, 12 neighs, 8x8 grid: ERR of [] reached at threshold []
-LBPH with radius 2, 16 neighs, 4x4 grid: ERR of [0.27771957] reached at threshold [32.16083796]
-LBPH with radius 2, 16 neighs, 8x8 grid: ERR of [] reached at threshold []
+LBPH with radius 1, 4 neighs, 4x4 grid: ERR of [0.38676116] reached at threshold [2.72761999]
+LBPH with radius 1, 4 neighs, 8x8 grid: ERR of [0.29240299] reached at threshold [31.17911654]
+LBPH with radius 1, 8 neighs, 4x4 grid: ERR of [0.32489127] reached at threshold [10.85447145]
+LBPH with radius 1, 8 neighs, 8x8 grid: ERR of [0.24529817] reached at threshold [91.4637661]
+LBPH with radius 2, 4 neighs, 4x4 grid: ERR of [0.28721441] reached at threshold [3.78022758]
+LBPH with radius 2, 4 neighs, 8x8 grid: ERR of [0.30722417] reached at threshold [40.69333439]
+LBPH with radius 2, 8 neighs, 4x4 grid: ERR of [0.26994779] reached at threshold [14.20188577]
+LBPH with radius 2, 8 neighs, 8x8 grid: ERR of [0.19961462] reached at threshold [112.73702716]
+LBPH with radius 2, 12 neighs, 4x4 grid: ERR of [0.28877885] reached at threshold [27.26806647]
+LBPH with radius 2, 12 neighs, 8x8 grid: ERR of [0.21862477] reached at threshold [164.06715608]
+LBPH with radius 2, 16 neighs, 4x4 grid: ERR of [0.30599343] reached at threshold [31.44527376]
+LBPH with radius 2, 16 neighs, 8x8 grid: ERR of [0.18972125] reached at threshold [176.93636716]
+
 

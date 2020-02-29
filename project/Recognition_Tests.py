@@ -418,7 +418,7 @@ if __name__ == '__main__':
 
     # Gerenerating/loading k-fold subsets
 
-    if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) == subsets:
+    if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
         for i in range(subsets):
             train_fn = os.path.join(test_files_folder, "{}_train.csv".format(i + 1))
             test_fn = os.path.join(test_files_folder, "{}_test.csv".format(i + 1))
@@ -500,7 +500,7 @@ if __name__ == '__main__':
     grid = [4, 8]
     models_tot = 24
 
-    test_thresholds = np.linspace(10, 150, 100)
+    test_thresholds = np.linspace(1, 200, 100)
 
     avgs = list()
     model_names = list()
