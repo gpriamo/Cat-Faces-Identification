@@ -269,6 +269,10 @@ def plot_error_rates(performancies, model_names):
             fars.append(performs['AVG_FAR'])
             frrs.append(performs['AVG_FRR'])
 
+        # Normalizing thresholds in [0, 1]
+        # thresholds = np.array(thresholds)
+        # thresholds = (thresholds - np.min(thresholds)) / (np.max(thresholds) - np.min(thresholds))
+
         err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
 
         print('{}: ERR of {} reached at threshold {}'.format(model_name, err, err_t))

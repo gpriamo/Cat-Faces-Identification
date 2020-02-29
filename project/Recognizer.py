@@ -56,17 +56,18 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Tr
     # print("Train finished")
 
     if type(model) is cv.face_LBPHFaceRecognizer:
-        print("Model Information:")
-        model_info = "\tLBPH(radius={}, neighbors={}, grid_x={}, grid_y={}, threshold={})".format(
-            model.getRadius(),
-            model.getNeighbors(),
-            model.getGridX(),
-            model.getGridY(),
-            model.getThreshold())
-        print(model_info)
+        if show_mean or show_faces:
+            print("Model Information:")
+            model_info = "\tLBPH(radius={}, neighbors={}, grid_x={}, grid_y={}, threshold={})".format(
+                model.getRadius(),
+                model.getNeighbors(),
+                model.getGridX(),
+                model.getGridY(),
+                model.getThreshold())
+            print(model_info)
 
-        histograms = model.getHistograms()
-        print("Size of the histograms: " + str(histograms[0].size))
+            histograms = model.getHistograms()
+            print("Size of the histograms: " + str(histograms[0].size))
 
     else:
         if show_mean or save_mean:

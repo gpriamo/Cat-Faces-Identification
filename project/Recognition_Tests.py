@@ -226,7 +226,7 @@ def compute_distance_matrix(test_csv, resize, model, height):
     return matrix  # , probe_labels
 
 
-def evaluate_performances(model, thresholds, train_csv, test_csv, resize=False):
+def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True):
     """
     Compute FAR, FRR, GRR and DIR(k) for each threshold passed in input
     based on the couple of training and testing files provided.
@@ -354,8 +354,7 @@ def evaluate_avg_performances(recognizer, thresholds, files):
 
     for train_f, test_f in files:
         # Returns a dictionary "Threshold: rates for the threshold" based on the 'train' & 'test' files
-        perf = evaluate_performances(model=recognizer, thresholds=thresholds, resize=True,
-                                     train_csv=train_f, test_csv=test_f)
+        perf = evaluate_performances(model=recognizer, thresholds=thresholds, train_csv=train_f, test_csv=test_f)
 
         for threshold in test_thresholds:
             avg_performances_per_threshold[threshold]["AVG_FRR"] += perf[threshold]["FRR"]
