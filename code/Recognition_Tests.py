@@ -132,6 +132,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True, u
     :param train_csv: file containing the images to be used for training
     :param test_csv: file containing the images to be used for testing
     :param resize: flag to resize the images
+    :param use_eyes: flag to specify whether to employ the eyes recognition routine
     :return: dictionary containing the computed rates
     """
 
@@ -224,10 +225,9 @@ def serialize_matrix(matrix, out_file):
         fi.write(ob)
 
 
-def load_matrix(file):
-    # TODO read & reformat matrix according to the real one
-    with open(file, "r+") as fi:
-        return json.loads(fi.read())
+# def load_matrix(file):
+#     with open(file, "r+") as fi:
+#         return json.loads(fi.read())
 
 
 def evaluate_avg_performances(recognizer, thresholds, files, use_eyes=False):
@@ -238,6 +238,7 @@ def evaluate_avg_performances(recognizer, thresholds, files, use_eyes=False):
     :param recognizer: model to be used
     :param thresholds: chosen thresholds
     :param files: iterable containing couples of training and testing files
+    :param use_eyes: flag to specify whether to employ the eyes recognition routine
     :return: dictionary with average rates
     """
     # print("Starting to compute performances...")
@@ -286,13 +287,6 @@ def evaluate_avg_performances(recognizer, thresholds, files, use_eyes=False):
 #         fi.write("AVG: " + str(avg) + "\n")
 #         fi.write(str(scores))
 #         fi.write("\n------\n\n")
-
-
-# def write_impostors(fd):
-#     impostors_ltf, impostors_files = utils.read_csv(impostors_csv, mapping=True)
-#
-#     for imp_file in impostors_files:
-#         fd.write(imp_file+";"+str(utils.get_label(imp_file))+"\n")
 
 
 def parse_args():
