@@ -4,7 +4,6 @@ import glob
 import numpy as np
 from os import path
 from PIL import Image
-import shutil
 
 from Detector import eye_cascade_model
 import Recognition_Tests as rc
@@ -57,9 +56,6 @@ def detect_cat_eyes(file, show=False, eyes_ScaleFactor=1.08, eyes_minNeighbors=3
                                               minNeighbors=eyes_minNeighbors,
                                               minSize=eyes_minSize)
     cont = 0
-
-    # if os.path.exists(save_dir):
-    #     shutil.rmtree(save_dir)
 
     for (ex, ey, ew, eh) in eyes:
         cont += 1
