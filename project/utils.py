@@ -273,8 +273,8 @@ def plot_error_rates(performancies, model_names, normalize_threshols=False):
             thresholds = np.array(thresholds)
             thresholds = (thresholds - np.min(thresholds)) / (np.max(thresholds) - np.min(thresholds))
 
-        plt.plot(thresholds, fars, label='FAR')
-        plt.plot(thresholds, frrs, label='FRR')
+        plt.plot(thresholds, fars, label=model_name + ': FAR')
+        plt.plot(thresholds, frrs, label=model_name + ': FRR')
 
         err_t, err = intersection(np.array(thresholds), np.array(fars), np.array(thresholds), np.array(frrs))
 

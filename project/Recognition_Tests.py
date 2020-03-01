@@ -444,67 +444,67 @@ if __name__ == '__main__':
 
             k_fold_files.append((train_fn, test_fn))
 
-    # print('=' * 80)
-    # print('K fold cross vaidation using k = {} subsets and {} impostors'.format(subsets, args.impostors))
-    # print('=' * 80)
+    print('=' * 80)
+    print('K fold cross vaidation using k = {} subsets and {} impostors'.format(subsets, args.impostors))
+    print('=' * 80)
 
-    # print('\n' + '-' * 80)
-    # print('Eigenfaces')
-    # print('-' * 80)
+    print('\n' + '-' * 80)
+    print('Eigenfaces')
+    print('-' * 80)
 
-    # default_components = 10000  # h * w
-    # n_components = [10, 80, default_components // 10, default_components]
+    default_components = 10000  # h * w
+    n_components = [10, 80, default_components // 10, default_components]
 
-    # test_thresholds = np.linspace(1000, 5000, 100)
+    test_thresholds = np.linspace(1000, 5000, 100)
 
-    # avgs = list()
-    # model_names = list()
+    avgs = list()
+    model_names = list()
 
-    # for nc in n_components:
-    #     print('Evaluating model #{} out of 4...'.format(len(avgs) + 1))
+    for nc in n_components:
+        print('Evaluating model #{} out of 4...'.format(len(avgs) + 1))
 
-    #     face_recognizer = cv.face.EigenFaceRecognizer_create(num_components=nc)
-    #     model_names.append('Eig. with {} comp'.format(nc))
+        face_recognizer = cv.face.EigenFaceRecognizer_create(num_components=nc)
+        model_names.append('Eig. with {} comp'.format(nc))
 
-    #     avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
+        avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
 
-    # print('Done\n')
+    print('Done\n')
 
-    # utils.plot_error_rates(avgs, model_names)
-    # utils.plot_rocs(avgs, model_names)
+    utils.plot_error_rates(avgs, model_names)
+    utils.plot_rocs(avgs, model_names)
 
-    # print('\n' + '-' * 80)
-    # print('Fisherfaces')
-    # print('-' * 80)
+    print('\n' + '-' * 80)
+    print('Fisherfaces')
+    print('-' * 80)
 
-    # test_thresholds = np.linspace(100, 1500, 100)
+    test_thresholds = np.linspace(100, 1500, 100)
 
-    # avgs = list()
-    # model_names = list()
+    avgs = list()
+    model_names = list()
 
-    # for nc in n_components:
-    #     print('Evaluating model #{} out of 4...'.format(len(avgs) + 1))
+    for nc in n_components:
+        print('Evaluating model #{} out of 4...'.format(len(avgs) + 1))
 
-    #     face_recognizer = cv.face.FisherFaceRecognizer_create(num_components=nc)
-    #     model_names.append('Fisher with {} comp'.format(nc))
+        face_recognizer = cv.face.FisherFaceRecognizer_create(num_components=nc)
+        model_names.append('Fisher with {} comp'.format(nc))
 
-    #     avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
+        avgs.append(evaluate_avg_performances(face_recognizer, test_thresholds, k_fold_files))
 
-    # print('Done\n')
+    print('Done\n')
 
-    # utils.plot_error_rates(avgs, model_names)
-    # utils.plot_rocs(avgs, model_names)
+    utils.plot_error_rates(avgs, model_names)
+    utils.plot_rocs(avgs, model_names)
 
     print('\n' + '-' * 80)
     print('LBPH')
     print('-' * 80)
 
-    radius = [2]
-    neighbors = [16]
-    grid = [8]
+    radius = [1, 2]
+    neighbors = [4, 8, 12, 16]
+    grid = [4, 8]
     models_tot = 24
 
-    test_thresholds = np.linspace(150, 200, 100)
+    test_thresholds = np.linspace(1, 200, 100)
 
     avgs = list()
     model_names = list()
