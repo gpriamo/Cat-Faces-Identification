@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+""" This module provides utility functions for several different purposes,
+from image processing and displaying to data plotting in graphs and more.
+
+Authors:
+    Pg96, dsforza96
+"""
+
 import cv2.cv2 as cv
 import math
 import matplotlib.pyplot as plt

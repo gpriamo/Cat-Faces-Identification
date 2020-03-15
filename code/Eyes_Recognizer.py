@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+""" This module provides functions to perform face recognition operations, also employing an eye color recognition
+additional feature.
+
+Authors:
+    sarettak
+"""
+
+
 from argparse import ArgumentParser
 import cv2.cv2 as cv
 import glob

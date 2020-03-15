@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+""" This module provides functions to perform the face recognition operation.
+
+Authors:
+    Pg96, dsforza96
+"""
+
+
 from argparse import ArgumentParser
 import numpy as np
 import cv2.cv2 as cv

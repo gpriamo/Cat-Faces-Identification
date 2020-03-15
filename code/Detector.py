@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+""" This module provides functions to detect, crop and align cat faces.
+
+Authors:
+    Pg96, dsforza96
+"""
+
 from argparse import ArgumentParser
 import cv2.cv2 as cv
 import utils

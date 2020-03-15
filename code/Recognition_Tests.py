@@ -1,10 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+""" This module provides functions to evaluate the performances of the recognition system.
+
+Authors:
+    Pg96, dsforza96
+"""
+
+
 from argparse import ArgumentParser
 import cv2.cv2 as cv
 from itertools import product
-import json
 import numpy as np
 import random
 import os
+# import json
 # import datetime
 
 import Recognizer
@@ -221,10 +231,10 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True, u
     return performances
 
 
-def serialize_matrix(matrix, out_file):
-    with open(out_file, "w+") as fi:
-        ob = json.dumps(matrix)
-        fi.write(ob)
+# def serialize_matrix(matrix, out_file):
+#     with open(out_file, "w+") as fi:
+#         ob = json.dumps(matrix)
+#         fi.write(ob)
 
 
 # def load_matrix(file):
