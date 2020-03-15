@@ -98,7 +98,7 @@ def create_csv(base_path, output_dir):
     print("Creating CSV file...")
 
     lines = []
-    lines_aligned = []
+    # lines_aligned = []
 
     for dir_name, dir_names, file_names in os.walk(base_path):
         dir_names.sort(key=lambda l: int(l.replace('s', '')))

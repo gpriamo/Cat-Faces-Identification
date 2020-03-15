@@ -5,9 +5,10 @@ import json
 import numpy as np
 import random
 import os
+# import datetime
 
-import Recognizer as rec
-import Eyes_Recognizer as eye_rec
+import Recognizer
+import Eyes_Recognizer
 import utils
 
 
@@ -37,7 +38,7 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
         random.shuffle(li)
 
     subsets = []
-    for i in range(k):
+    for _ in range(k):
         s = set()
 
         for subj_lst in ls:
@@ -48,20 +49,20 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
         st += pps
 
     ret = []
-    for i in range(k):
+    for j in range(k):
         # each time, the i-th element is the testing subset
-        test = subsets[i]
+        test_set = subsets[j]
 
         # and use the rest as training subset
         training = set()
 
         cpy = subsets[:]
-        cpy.remove(test)
+        cpy.remove(test_set)
 
         for c in cpy:
             training.update(c)
 
-        imps = impostors[i * n_impostors:(i + 1) * n_impostors]
+        imps = impostors[j * n_impostors:(j + 1) * n_impostors]
         for imp in imps:
             for image in list(training)[:]:
                 if utils.get_label(image) == imp:
@@ -70,10 +71,10 @@ def k_fold_cross_validation(dataset_path, k=5, n_impostors=1):
         # ret.append((list(training), list(test)))
 
         training_ls = list(training)
-        testing_ls = list(test)
+        testing_ls = list(test_set)
 
-        training_ls = [x+";"+str(utils.get_label(x)) for x in training_ls]
-        testing_ls = [x+";"+str(utils.get_label(x)) for x in testing_ls]
+        training_ls = [x + ";" + str(utils.get_label(x)) for x in training_ls]
+        testing_ls = [x + ";" + str(utils.get_label(x)) for x in testing_ls]
 
         ret.append((training_ls, testing_ls))
 
@@ -89,6 +90,8 @@ def compute_distance_matrix(test_csv, resize, model, height, use_eyes=False):
     :param resize: flag to resize the probe images or not
     :param model: recongizer to be used
     :param height: height of each photo
+    :param use_eyes: flag to specify whether to use the eyes
+    recognition routine for the prediction
     :return: generated distance matrix
     """
 
@@ -105,18 +108,17 @@ def compute_distance_matrix(test_csv, resize, model, height, use_eyes=False):
         probe_labels.add(label)
 
         if not use_eyes:
-            prediction = rec.predict(model=model, height=height, resize=resize,
-                                    probe_label=label, probe_image=file, identification=True)
+            prediction = Recognizer.predict(recognizer=model, height=height, resize=resize,
+                                            probe_label=label, probe_image=file, identification=True)
         else:
-            prediction = eye_rec.predict(model=model, height=height, resize=resize,
-                                    probe_label=label, probe_image=file, identification=True)
+            prediction = Eyes_Recognizer.predict(model=model, height=height, resize=resize,
+                                                 probe_label=label, probe_image=file, identification=True)
 
         matrix[(file, label)] = prediction
 
         # matrix_ser["{0}#{1}".format(file, label)] = prediction
 
     # print("Matrix computed. Trying to serialize...")
-    # import datetime
     # serialize_matrix(matrix_ser, '../test/1/matrix{}.json'.format(datetime.datetime.now()))
 
     return matrix  # , probe_labels
@@ -138,7 +140,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True, u
 
     # print("Evaluating performances for files {} {}...\n".format(train_csv, test_csv))
 
-    model, height, gallery_labels = rec.train_recongizer(model, train_csv, resize, ret_labels=True)
+    model, height, gallery_labels = Recognizer.train_recongizer(model, train_csv, resize, ret_labels=True)
     # print(gallery_labels)
 
     distance_matrix = compute_distance_matrix(test_csv, resize, model=model, height=height, use_eyes=use_eyes)
@@ -207,7 +209,7 @@ def evaluate_performances(model, thresholds, train_csv, test_csv, resize=True, u
         higher_ranks = sorted(list(di.keys()))
         higher_ranks.remove(1)  # remove first rank, as here we're interested in the higher ones
         for k in higher_ranks:
-            if k-1 not in dir_k.keys():
+            if k - 1 not in dir_k.keys():
                 dir_k[k - 1] = dir_k[max(dir_k.keys())]
             dir_k[k] = (di[k] / genuine_attempts) + dir_k[k - 1]
 
@@ -251,7 +253,8 @@ def evaluate_avg_performances(recognizer, thresholds, files, use_eyes=False):
 
     for train_f, test_f in files:
         # Returns a dictionary "Threshold: rates for the threshold" based on the 'train' & 'test' files
-        perf = evaluate_performances(model=recognizer, thresholds=thresholds, train_csv=train_f, test_csv=test_f, use_eyes=use_eyes)
+        perf = evaluate_performances(model=recognizer, thresholds=thresholds, train_csv=train_f, test_csv=test_f,
+                                     use_eyes=use_eyes)
 
         for threshold in thresholds:
             avg_performances_per_threshold[threshold]["AVG_FRR"] += perf[threshold]["FRR"]
@@ -293,7 +296,8 @@ def parse_args():
     parser = ArgumentParser()
     parser.add_argument('input_dataset', help='The path of the input dataset')
     parser.add_argument('-o', '--output', help='The path of the output directory', default='../test/k_fold/complete')
-    parser.add_argument('-k', '--subsets', help='The number of subsets in which to divide the dataset', type=int, default=5)
+    parser.add_argument('-k', '--subsets', help='The number of subsets in which to divide the dataset', type=int,
+                        default=5)
     parser.add_argument('-i', '--impostors', help='The number of impostors to use', type=int, default=5)
     return parser.parse_args()
 
@@ -301,20 +305,20 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    subsets = args.subsets
+    subsets_no = args.subsets
     test_files_folder = os.path.join(args.output, 'csv')
     k_fold_files = list()
 
     # Gerenerating/loading k-fold subsets
 
     if os.path.exists(test_files_folder) and len(os.listdir(test_files_folder)) != 0:
-        for i in range(subsets):
+        for i in range(subsets_no):
             train_fn = os.path.join(test_files_folder, "{}_train.csv".format(i + 1))
             test_fn = os.path.join(test_files_folder, "{}_test.csv".format(i + 1))
 
             k_fold_files.append((train_fn, test_fn))
     else:
-        k_fold = k_fold_cross_validation(args.input_dataset, k=subsets, n_impostors=args.impostors)
+        k_fold = k_fold_cross_validation(args.input_dataset, k=subsets_no, n_impostors=args.impostors)
 
         for i in range(len(k_fold)):
             train, test = k_fold[i]
@@ -330,7 +334,7 @@ if __name__ == '__main__':
             k_fold_files.append((train_fn, test_fn))
 
     print('=' * 80)
-    print('K fold cross vaidation using k = {} subsets and {} impostors'.format(subsets, args.impostors))
+    print('K fold cross validation using k = {} subsets and {} impostors'.format(subsets_no, args.impostors))
     print('=' * 80)
 
     print('\n' + '-' * 80)

@@ -12,12 +12,12 @@ cat_cascades = ['haarcascade_frontalcatface.xml', 'haarcascade_frontalcatface_ex
 eye_cascade_model = path.join(cascade_models_dir, 'haarcascade_eye.xml')
 
 
-def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors=2,
+def detect_cat_face(image_file, classifier, show=False, scaleFactor=1.05, minNeighbors=2,
                     eyes_ScaleFactor=1.08, eyes_minNeighbors=3, eyes_minSize=(40, 40)):
     """
     Cat face detection utility.
 
-    :param file : str
+    :param image_file : str
         The name of the image file to detect the face from.
     :param classifier : int
         Integer used to select the type of detector model to be used:
@@ -39,11 +39,11 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
     :return the cropped face and the location of the eyes, if detected, else None.
     """
 
-    detector = cat_cascades[classifier]
-    print("Chosen classifier: " + detector)
+    face_detector = cat_cascades[classifier]
+    print("Chosen classifier: " + face_detector)
     print("SF={0}, minN={1}".format(scaleFactor, minNeighbors))
 
-    cat_cascade = cv.CascadeClassifier(path.join(cascade_models_dir, detector))
+    cat_cascade = cv.CascadeClassifier(path.join(cascade_models_dir, face_detector))
     eye_cascade = cv.CascadeClassifier(eye_cascade_model)
 
     if cat_cascade.empty():
@@ -52,13 +52,13 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
     if eye_cascade.empty():
         raise RuntimeError('The eye classifier was not loaded correctly!')
 
-    img = cv.imread(file)
+    img = cv.imread(image_file)
 
-    img_orig = cv.imread(file)
+    img_orig = cv.imread(image_file)
 
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    face = cat_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
+    faces = cat_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
 
     if classifier == 0:
         col = (255, 0, 0)
@@ -69,7 +69,7 @@ def detect_cat_face(file, classifier, show=False, scaleFactor=1.05, minNeighbors
 
     cropped = None
 
-    for (x, y, w, h) in face:  # blue
+    for (x, y, w, h) in faces:  # blue
         img = cv.rectangle(img, (x, y), (x + w, y + h), col, 2)
         roi_gray = gray[y:y + h, x:x + w]
         roi_color = img[y:y + h, x:x + w]
@@ -265,8 +265,8 @@ if __name__ == '__main__':
     out_dir = args.output
     image = args.input_image
 
-    dir, file = path.split(image)
-    dir_name = path.basename(dir)
+    directory, file = path.split(image)
+    dir_name = path.basename(directory)
     file_name, file_extension = path.splitext(file)
 
     save_dir = path.join(out_dir, dir_name)

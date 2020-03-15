@@ -25,16 +25,16 @@ def norm_0_255(source: np.ndarray):
     return dst
 
 
-def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=True, ret_labels=False,
-            save_dir=None,
-            show_mean=False,
-            save_mean=False,
-            show_faces=False,
-            save_faces=False):
+def train_recongizer(recognizer: cv.face_BasicFaceRecognizer, csv_filename, resize=True, ret_labels=False,
+                     save_dir=None,
+                     show_mean=False,
+                     save_mean=False,
+                     show_faces=False,
+                     save_faces=False):
     """
     Trains a face recognizer.
 
-    :param model: face recognizer to be trained.
+    :param recognizer: face recognizer to be trained.
     :param csv_filename: file containing the images to be used for the training process.
     :param resize: flag to specify whether images should be resized.
     :param ret_labels: flag to specify whether the list of labels used for training should be returned.
@@ -51,27 +51,27 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Tr
 
     height = faces[0].shape[0]
 
-    model.train(faces, np.array(labels))
+    recognizer.train(faces, np.array(labels))
 
     # print("Train finished")
 
-    if type(model) is cv.face_LBPHFaceRecognizer:
+    if type(recognizer) is cv.face_LBPHFaceRecognizer:
         if show_mean or show_faces:
             print("Model Information:")
             model_info = "\tLBPH(radius={}, neighbors={}, grid_x={}, grid_y={}, threshold={})".format(
-                model.getRadius(),
-                model.getNeighbors(),
-                model.getGridX(),
-                model.getGridY(),
-                model.getThreshold())
+                recognizer.getRadius(),
+                recognizer.getNeighbors(),
+                recognizer.getGridX(),
+                recognizer.getGridY(),
+                recognizer.getThreshold())
             print(model_info)
 
-            histograms = model.getHistograms()
+            histograms = recognizer.getHistograms()
             print("Size of the histograms: " + str(histograms[0].size))
 
     else:
         if show_mean or save_mean:
-            mean = model.getMean()
+            mean = recognizer.getMean()
 
             reshaped_mean = mean.reshape(height, -1)
             normalized_mean = norm_0_255(reshaped_mean)
@@ -82,10 +82,10 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Tr
                 cv.imwrite(os.path.join(save_dir, "mean.png"), normalized_mean)
 
         if show_faces or save_faces:
-            eigenvalues: np.ndarray = model.getEigenValues()
-            eigenvectors: np.ndarray = model.getEigenVectors()
+            eigenvalues: np.ndarray = recognizer.getEigenValues()
+            eigenvectors: np.ndarray = recognizer.getEigenVectors()
 
-            colormap = cv.COLORMAP_JET if type(model) is cv.face_EigenFaceRecognizer else cv.COLORMAP_BONE
+            colormap = cv.COLORMAP_JET if type(recognizer) is cv.face_EigenFaceRecognizer else cv.COLORMAP_BONE
             faces = []
 
             for i in range(0, min(10, len(eigenvectors.T))):
@@ -106,16 +106,17 @@ def train_recongizer(model: cv.face_BasicFaceRecognizer, csv_filename, resize=Tr
                 utils.show_images(faces)
 
     if ret_labels:
-        return model, height, set(labels)
+        return recognizer, height, set(labels)
 
-    return model, height
+    return recognizer, height
 
 
-def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label=None, resize=True, identification=True):
+def predict(recognizer: cv.face_BasicFaceRecognizer, height, probe_image, probe_label=None, resize=True,
+            identification=True):
     """
     Performs a face recognition operation.
 
-    :param model: face recognizer.
+    :param recognizer: face recognizer.
     :param height: height of the images used to train the model.
     :param probe_image: path to the image of the probe.
     :param probe_label: label of the probe.
@@ -130,11 +131,12 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
     input_face = cv.imread(probe_image, 0)
 
     if resize:
-        input_face = utils.resize_image(input_face, 100, 100)
+        # input_face = utils.resize_image(input_face, 100, 100)
+        input_face = utils.resize_image(input_face, height, height)
 
     if identification:
         coll: cv.face_StandardCollector = cv.face.StandardCollector_create()
-        pred = model.predict_collect(input_face, coll)
+        recognizer.predict_collect(input_face, coll)
         # print(coll.getResults())
         # print(coll.getMinDist())
         # print(coll.getMinLabel())
@@ -151,7 +153,7 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
 
         return results
 
-    prediction = model.predict(input_face)
+    prediction = recognizer.predict(input_face)
 
     if probe_label is not None:
         print("Predicted class = {0} ({1}) with confidence = {2}; Actual class = {3} ({4}).\n\t Outcome: {5}"
@@ -160,38 +162,38 @@ def predict(model: cv.face_BasicFaceRecognizer, height, probe_image, probe_label
                       "Success!" if prediction[0] == probe_label else "Failure!"))
 
 
-def save_model(model: cv.face_BasicFaceRecognizer, save_dir, height, uid=0):
+def save_model(recognizer_model: cv.face_BasicFaceRecognizer, save_dir, height, uid=0):
     """
     Saves a recognizer model to file.
-    :param model: model to be saved.
+    :param recognizer_model: model to be saved.
     :param save_dir: path where the model should be saved.
     :param height: height of the images used for the training.
     :param uid: identifier of the model to save.
     """
     file_name = os.path.join(save_dir, "model_{0}_{1}.xml".format(uid, height))
     print("Saving model to: ", file_name)
-    model.save(file_name)
+    recognizer_model.save(file_name)
 
 
-def load_model(model: cv.face_BasicFaceRecognizer, file_name):
+def load_model(recognizer_model: cv.face_BasicFaceRecognizer, file_name):
     """
     Loads a previously-saved model from file.
-    :param model: empty model the file should be loaded into.
+    :param recognizer_model: empty model the file should be loaded into.
     :param file_name: the file where the model is stored.
     :return: the loaded model.
     """
-    model.read(file_name)
+    recognizer_model.read(file_name)
     height = file_name.split("_")[-1].split(".")[0]
 
-    return model, int(height)
+    return recognizer_model, int(height)
 
 
-# def test_cropped(model: cv.face_BasicFaceRecognizer):
-#     mod, hei = train_recongizer(model, "../dataset_info/complete.csv", resize=True)
-#     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1, identification=False)
-#     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2, identification=False)
-#     predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8, identification=False)
-#     save_model(mod, hei)
+# def test_cropped(model: cv.face_BasicFaceRecognizer): mod, hei = train_recongizer(model,
+# "../dataset_info/complete.csv", resize=True) predict(model=mod, height=hei, resize=True,
+# probe_image="../images/dataset/cropped/s1/27.jpg", probe_label=1, identification=False) predict(model=mod,
+# height=hei, resize=True, probe_image="../images/dataset/cropped/s2/10.jpg", probe_label=2, identification=False)
+# predict(model=mod, height=hei, resize=True, probe_image="../images/dataset/cropped/s8/22.jpg", probe_label=8,
+# identification=False) save_model(mod, hei)
 
 
 def parse_args():
