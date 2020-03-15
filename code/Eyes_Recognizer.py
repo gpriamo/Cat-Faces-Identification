@@ -24,12 +24,10 @@ eyes_color = {
 cache_dir = '../images/eyes/'
 
 
-def detect_cat_eyes(file, show=False, eyes_ScaleFactor=1.08, eyes_minNeighbors=3, eyes_minSize=(40, 40)):
+def detect_cat_eyes(file, eyes_ScaleFactor=1.08, eyes_minNeighbors=3, eyes_minSize=(40, 40)):
     """
     Cat eyes detection utility.
 
-    :param show: bool
-        set to True to see an output image
     :param file : str
         The name of the image file to detect the face from.
     :param eyes_ScaleFactor: float
